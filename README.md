@@ -1,6 +1,6 @@
 # Dominó UCM
 
-Respositorio para tener controlado por versiones y actualizado el código del ejercicio del dominó, el cual es la práctica final de la asignatura Fundamentos de Programción I del grado de Ingeniería de Computadores por la UCM.
+Repositorio para tener controlado por versiones y actualizado el código del ejercicio del dominó, el cual es la práctica final de la asignatura Fundamentos de Programción I del grado de Ingeniería de Computadores por la UCM.
 
 ## Participantes
 - Alejandro
