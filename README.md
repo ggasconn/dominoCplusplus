@@ -9,17 +9,17 @@ Respositorio para tener controlado por versiones y actualizado el código del ej
 ## Lista de pendientes por versión
 
 ### Primera versión
-- [] Implementar plantilla con funciones y prototipos
-- [] Bucle en main
-- [] Función mostrarMenu 
-- [] Función fichaToStr
-- [] Función mostrarTablero
-- [] Función aleat
-- [] Función toStr
-- [] Función puedePonerIzq
-- [] Función puedePonerDer
-- [] Función ponerFichaIzq 
-- [] Función ponerFichaDer
+- [ ] Implementar plantilla con funciones y prototipos
+- [ ] Bucle en main
+- [ ] Función mostrarMenu 
+- [ ] Función fichaToStr
+- [ ] Función mostrarTablero
+- [ ] Función aleat
+- [ ] Función toStr
+- [ ] Función puedePonerIzq
+- [ ] Función puedePonerDer
+- [ ] Función ponerFichaIzq 
+- [ ] Función ponerFichaDer
 
 ### Segunda versión
 ### Tercera versión
