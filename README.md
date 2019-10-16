@@ -9,7 +9,8 @@ Respositorio para tener controlado por versiones y actualizado el código del ej
 ## Lista de pendientes por versión
 
 ### Primera versión
-- [ ] Implementar plantilla con funciones y prototipos
+- [ ] Completar documentación funciones
+- [x] Implementar plantilla con funciones y prototipos
 - [ ] Bucle en main
 - [ ] Función mostrarMenu 
 - [ ] Función fichaToStr
