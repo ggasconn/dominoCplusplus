@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdlib>
+#import <time.h>
 
 using namespace std;
 
@@ -21,7 +22,52 @@ int ponerFichaDer(string tablero, short int fichaN1, short int fichaN2);
 * Se finaliza la ejecución con 0.
 */
 int main() {
+    short int opcionElegida;
 
+    do {
+        opcionElegida = mostrarMenu();
+
+        switch (opcionElegida)
+        {
+        case 1:
+            cout << "Elegida opción 1" << endl;
+            break;
+        
+        case 2:
+            cout << "Elegida opción 2" << endl;
+            break;
+        
+        case 3:
+            cout << "Elegida opción 3" << endl;
+            break;
+        
+        default:
+            if (opcionElegida != 0) cout << opcionElegida << " no es una opción válida" << endl;
+            break;
+        }
+
+    } while(opcionElegida != 0);
+}
+
+
+/**
+* Devuelve menu principal con opciones y recupera la elegida.
+*/
+int mostrarMenu() {
+    short int opcionElegida; // Almacena lo que el usuario elije del menu
+
+    cout << "-------------------" << endl;
+    cout << "| MENU DE OPCIONES |" << endl;
+    cout << "-------------------" << endl;
+    cout << "1. Poner ficha por la izquierda" << endl;
+    cout << "2. Poner ficha por la derecha" << endl;
+    cout << "3. Robar ficha nueva" << endl;
+    cout << "0. Salir" << endl << endl;
+    cout << "Elija una opción: ";
+
+    cin >> opcionElegida;
+
+    return opcionElegida;
 }
 
 /**
@@ -53,7 +99,13 @@ void mostrarTablero(short int fichaN1, short int fichaN2, string tablero, int nu
 * Deuvuelve un entero aleatorio entre 1 y 6
 */
 short int aleat(){
+    int numAleat;
+    //Genera semilla para saltear el numero aleatorio
+    srand(time(NULL));
 
+    numAleat = rand() % 6 + 1;
+
+    return numAleat;
 }
 
 

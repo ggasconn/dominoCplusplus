@@ -11,11 +11,11 @@ Repositorio para tener controlado por versiones y actualizado el código del eje
 ### Primera versión
 - [ ] Completar documentación funciones
 - [x] Implementar plantilla con funciones y prototipos
-- [ ] Bucle en main
-- [ ] Función mostrarMenu 
+- [x] Bucle en main
+- [x] Función mostrarMenu 
 - [ ] Función fichaToStr
 - [ ] Función mostrarTablero
-- [ ] Función aleat
+- [x] Función aleat
 - [ ] Función toStr
 - [ ] Función puedePonerIzq
 - [ ] Función puedePonerDer
