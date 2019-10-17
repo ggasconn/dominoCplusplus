@@ -16,11 +16,17 @@ Repositorio para tener controlado por versiones y actualizado el código del eje
 - [ ] Función fichaToStr
 - [ ] Función mostrarTablero
 - [x] Función aleat
-- [ ] Función toStr
+- [x] Función toStr
 - [ ] Función puedePonerIzq
 - [ ] Función puedePonerDer
 - [ ] Función ponerFichaIzq 
 - [ ] Función ponerFichaDer
+- [x] Función salvarPartida
+- [x] Función comprobarPartida
+- [x] Función recuperarPartida
+
+#### Errores a solventar
+- [ ] La función recuperarPartida devuelve un uno antes de la cadena
 
 ### Segunda versión
 ### Tercera versión
