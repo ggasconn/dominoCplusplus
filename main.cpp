@@ -1,5 +1,5 @@
 /*
-* Dominó realizado por Alejandro y Guillermo
+* Domino realizado por Alejandro y Guillermo
 *
 * Happy Coding! :)
 **/
@@ -24,47 +24,91 @@ bool puedePonerIzq(string tablero, short int fichaN1, short int fichaN2);
 bool puedePonerDer(string tablero, short int fichaN1, short int fichaN2);
 string ponerFichaIzq(string tablero, short int fichaN1, short int fichaN2);
 string ponerFichaDer(string tablero, short int fichaN1, short int fichaN2);
-bool salvarPartida(string tablero);
+bool salvarPartida(string tablero, short int numColocadas, short int numRobadas);
+bool existePartida();
 char comprobarPartida();
 string recuperarPartida();
+
 
 /**
 * Funcion principal, contiene un menu interminable. 
 * Se finaliza la ejecución con 0.
 */
 int main() {
+    //Genera semilla para saltear el numero aleatorio
+    srand(time(NULL));
+
     short int opcionElegida;
-    short int numColocadas;
-    short int numRobadas;
-    short int fichaN1 = 6;
-    short int fichaN2 = 4;
+    short int numColocadas = 0;
+    short int numRobadas = 0;
+    short int fichaN1 = aleat();
+    short int fichaN2 = aleat();
     bool haRobado;
-    string tablero = "|6-4|";
+    bool haColocado;
+    string tablero = fichaToStr(aleat(), aleat());
+
+    if(existePartida()) {
+        char restaurar;
+
+        cout << "Se ha encontrado una partida guardada. ¿Quiere restaurarla? (y/n): ";
+        cin >> restaurar;
+
+        if (restaurar == 'y') {
+            string s = recuperarPartida();
+            tablero = s.substr(0, s.find('&'));
+            string x = s.substr(s.find('&') + 1, s.find_last_of('&')-s.find('&')-1);
+            string y = s.substr(tablero.length() + x.length() + 2, s.find('&'));
+            numColocadas = stoi(x);
+            numRobadas = stoi(x);
+
+            cout << endl << ">>> Partida restaurada" << endl;
+        }
+    }
 
     //Mostrar tablero
-    mostrarTablero(6, 6, tablero, 4, 2);
-
+    mostrarTablero(fichaN1, fichaN2, tablero, numColocadas, numRobadas);
+   
     do {
+        bool haRobado = false;
+        bool haColocado = false;
+
         opcionElegida = mostrarMenu();
 
         switch (opcionElegida)
         {
         case 1:
-            tablero = ponerFichaIzq(tablero, fichaN1, fichaN2);
+            if (puedePonerIzq(tablero, fichaN1, fichaN2)) {
+                tablero = ponerFichaIzq(tablero, fichaN1, fichaN2);
+                numColocadas++;
+                haColocado = true;
+            }else {
+                haRobado = true;
+                cout << ">>> No se puede colocar una ficha a la izquierda" << endl << endl;
+            }
             break;
         
         case 2:
-            tablero = ponerFichaDer(tablero, fichaN1, fichaN2);
+            if (puedePonerDer(tablero, fichaN1, fichaN2)) {
+                tablero = ponerFichaDer(tablero, fichaN1, fichaN2);
+                numColocadas++;
+                haColocado = true;
+            }else {
+                haRobado = true;
+                cout << ">>> No se puede colocar una ficha a la derecha" << endl << endl;
+            }
             break;
         
         case 3:
-            cout << "Elegida opción 3" << endl;
+            fichaN1 = aleat();
+            fichaN2 = aleat();
+            numRobadas++;
+            haRobado = true;
             break;
         
         case 4:
             cout << ">>> Salvando partida a fichero game_history.txt" << endl;
             
-            if (salvarPartida(tablero)) {
+            if (salvarPartida(tablero, numColocadas, numRobadas)) {
                 cout << ">>> OK" << endl << endl;
             }else {
                 cout << ">>> Error: no se pudo guardar la partida o se denegó la acción" << endl << endl;
@@ -77,8 +121,15 @@ int main() {
             break;
         }
 
+        if (!haRobado)
+        {
+            fichaN1 = aleat();
+            fichaN2 = aleat();
+        }
+        
+
         //Mostrar tablero
-        mostrarTablero(6, 6, tablero, 4, 2);
+        mostrarTablero(fichaN1, fichaN2, tablero, numColocadas, numRobadas);
 
     } while(opcionElegida != 0);
 }
@@ -91,7 +142,7 @@ int main() {
 */
 int mostrarMenu() {
     short int opcionElegida; // Almacena lo que el usuario elije del menu
-
+    
     cout << " ------------------" << endl;
     cout << "| MENU DE OPCIONES |" << endl;
     cout << " ------------------" << endl;
@@ -103,6 +154,8 @@ int mostrarMenu() {
     cout << "Elija una opción: ";
 
     cin >> opcionElegida;
+
+    cout << endl;
 
     return opcionElegida;
 }
@@ -160,9 +213,7 @@ void mostrarTablero(short int fichaN1, short int fichaN2,
 */
 short int aleat(){
     int numAleat;
-    //Genera semilla para saltear el numero aleatorio
-    srand(time(NULL));
-
+    
     numAleat = rand() % 6 + 1;
 
     return numAleat;
@@ -235,15 +286,13 @@ string ponerFichaIzq(string tablero, short int fichaN1, short int fichaN2){
     short int extremoTablero =  int(tablero[1]) - int('0');
     string fichaFinal;
 
-    if (puedePonerIzq(tablero, fichaN1, fichaN2)) {
-        if (extremoTablero == fichaN1) {
-            fichaFinal = fichaToStr(fichaN2, fichaN1);
-        }else {
-            fichaFinal = fichaToStr(fichaN1, fichaN2);
-        }
-
-        tablero = tablero.insert(0, fichaFinal);
+    if (extremoTablero == fichaN1) {
+        fichaFinal = fichaToStr(fichaN2, fichaN1);
+    }else {
+        fichaFinal = fichaToStr(fichaN1, fichaN2);
     }
+
+    tablero = fichaFinal.append(tablero);
 
     return tablero;
 }
@@ -264,15 +313,13 @@ string ponerFichaDer(string tablero, short int fichaN1, short int fichaN2){
     short int extremoTablero = int(tablero[tablero.size() - 2]) - int('0');
     string fichaFinal;
 
-    if (puedePonerDer(tablero, fichaN1, fichaN2)) {
-        if (extremoTablero == fichaN1) {
-            fichaFinal = fichaToStr(fichaN1, fichaN2);
-        }else {
-            fichaFinal = fichaToStr(fichaN2, fichaN1);
-        }
-
-        tablero = tablero.append(fichaFinal);
+    if (extremoTablero == fichaN1) {
+        fichaFinal = fichaToStr(fichaN1, fichaN2);
+    }else {
+        fichaFinal = fichaToStr(fichaN2, fichaN1);
     }
+
+    tablero = tablero.append(fichaFinal);
 
     return tablero;
 }
@@ -287,7 +334,7 @@ string ponerFichaDer(string tablero, short int fichaN1, short int fichaN2){
 *
 * @return Devuelve true si la partida se guardo, false si no.
 */
-bool salvarPartida(string tablero){
+bool salvarPartida(string tablero , short int numColocadas, short int numRobadas){
     bool partidaSalvada = false;
     
     if (comprobarPartida() == 'y') {
@@ -295,7 +342,7 @@ bool salvarPartida(string tablero){
 
         ficheroPartida.open("game_history.txt");
 
-        ficheroPartida << tablero;
+        ficheroPartida << tablero << "&" << numColocadas << "&" << numRobadas;
 
         partidaSalvada = true;
 
@@ -307,27 +354,49 @@ bool salvarPartida(string tablero){
 
 
 /**
+ * Comprueba si existe un fichero con una partida ya guardada.
+ * 
+ * @return true si existe el fichero, false si no
+ */
+bool existePartida() {
+    bool existe = false;
+    ifstream ficheroPartida;
+
+    ficheroPartida.open("game_history.txt");
+
+    if (ficheroPartida.is_open()) {
+        existe = true;
+        ficheroPartida.close();
+    }
+
+    return existe;
+}
+
+
+/**
 * Comprueba si existe una partida guardada y pregunta si se quiere sobreescribir.
 *
 * @return Char siendo 'y' que no existe o se quiere borrar y 'n' que se interrumpe la operacion.
 */
 char comprobarPartida() {
     char borrarPartida = 'y';
-    ifstream ficheroPartida;
+    
+    if (existePartida()) {
+        string s = recuperarPartida();
+        string x = s.substr(0, s.find('&'));
+        string y = s.substr(s.find('&') + 1, s.find_last_of('&')-s.find('&')-1);
+        string z = s.substr(x.length() + y.length() + 2, s.find('&'));
 
-    ficheroPartida.open("game_history.txt");
-
-    if (ficheroPartida.is_open()) {
+        
         cout << endl << "@@@@@@@@@@@@" << endl;
         cout << "@ ATENCION @" << endl;
         cout << "@@@@@@@@@@@@" << endl;
         cout << "Se ha encontrado una partida guardada con el siguiente estado: " << endl;
-        // TODO: La funcion que recupera el tablero devuelve un uno antes de la cadena, 
-        // pero ese 1 no existe en el fichero. ¿Puede ser el numero de linea?
-        cout << recuperarPartida() << endl;
+        cout << "Tablero: " << x << "   Colocadas: " << y << "  Robadas: " << z << endl;
         cout << "Seguro que desea sobrescribirla? (y/n): ";
         cin >> borrarPartida;
     }
+
     return borrarPartida;
 }
 
@@ -338,7 +407,7 @@ char comprobarPartida() {
 * @return Cadena con el estado de la partida o excepción en error
 */
 string recuperarPartida(){
-    string tablero;
+    string datosPartida;
     //Declara el objeto con el fichero y comprueba si existe.
     ifstream ficheroPartida;
     
@@ -347,10 +416,10 @@ string recuperarPartida(){
     if (! ficheroPartida.is_open()) {
         throw runtime_error("No se pudo abrir el fichero con el historial. Compruebe si existe o si ha sido borrado.");
     }else {
-        getline(ficheroPartida, tablero);
+        getline(ficheroPartida, datosPartida);
     }
 
     ficheroPartida.close();
 
-    return tablero;
+    return datosPartida;
 }
