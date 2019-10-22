@@ -325,6 +325,9 @@ string ponerFichaDer(string tablero, short int fichaN1, short int fichaN2){
 }
 
 
+//////////////////////////////////////////////////////////////////////
+// El formato del fichero es: tablero&fichasColocadas&fichasRobadas //
+//////////////////////////////////////////////////////////////////////
 /**
 * Recibe como parámetro una cadena que guarda en un fichero.
 * Si el fichero previamente existe se supone que ya hay una partida
