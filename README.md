@@ -30,7 +30,7 @@ Repositorio para tener controlado por versiones y actualizado el código del eje
 - [x] Salvar contadores a fichero al guardar
 - [x] Recuperar contadores a fichero al guardar
 - [x] Iniciar partida desde fichero
-- [ ] Pensar mejor manera de guardar partida. Quizás un struct guardado en un fichero y tratar las variables como objeto.
+- [x] Pensar mejor manera de guardar partida. Quizás un struct guardado en un fichero y tratar las variables como objeto.
 
 #### Errores a solventar
 - [x] La función ```recuperarPartida``` devuelve un uno antes de la cadena. *EDIT: compilando y ejecutando el Linux parece que deja de aparecer ese 1.
