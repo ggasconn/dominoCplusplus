@@ -1,4 +1,3 @@
-// This is a test on git branches
 /*
 * Domino realizado por Alejandro y Guillermo
 * Ambas partes extras realizadas
