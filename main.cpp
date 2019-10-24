@@ -15,6 +15,11 @@
 
 using namespace std;
 
+struct gameData{
+    string tablero;
+    int numColocadas;
+    int numRobadas;
+};
 
 //Prototipos de funciones a usar durante el programa
 int mostrarMenu();
@@ -28,8 +33,8 @@ string ponerFichaIzq(string tablero, short int fichaN1, short int fichaN2);
 string ponerFichaDer(string tablero, short int fichaN1, short int fichaN2);
 bool salvarPartida(string tablero, short int numColocadas, short int numRobadas);
 bool existePartida();
-char comprobarPartida();
-string recuperarPartida();
+char confirmarBorrado();
+gameData recuperarPartida();
 
 
 /**
@@ -57,12 +62,10 @@ int main() {
         cin >> restaurar;
 
         if (restaurar == 'y') {
-            string s = recuperarPartida();
-            tablero = s.substr(0, s.find('&'));
-            string x = s.substr(s.find('&') + 1, s.find_last_of('&')-s.find('&')-1);
-            string y = s.substr(tablero.length() + x.length() + 2, s.find('&'));
-            numColocadas = stoi(x);
-            numRobadas = stoi(x);
+            struct gameData newStruct = recuperarPartida();
+            tablero = newStruct.tablero;
+            numColocadas = newStruct.numColocadas;
+            numRobadas = newStruct.numRobadas;
 
             cout << endl << ">>> Partida restaurada" << endl;
         }
@@ -112,9 +115,9 @@ int main() {
             cout << ">>> Salvando partida a fichero game_history.txt" << endl;
             
             if (salvarPartida(tablero, numColocadas, numRobadas)) {
-                cout << ">>> OK" << endl << endl;
+                cout << endl << ">>> OK" << endl << endl;
             }else {
-                cout << ">>> Error: no se pudo guardar la partida o se denegó la acción" << endl << endl;
+                cout << endl << ">>> Error: no se pudo guardar la partida o se denegó la acción" << endl << endl;
             }
 
             break;
@@ -334,13 +337,11 @@ string ponerFichaDer(string tablero, short int fichaN1, short int fichaN2){
 }
 
 
-//////////////////////////////////////////////////////////////////////
-// El formato del fichero es: tablero&fichasColocadas&fichasRobadas //
-//////////////////////////////////////////////////////////////////////
 /**
 * Recibe como parámetro una cadena que guarda en un fichero.
 * Si el fichero previamente existe se supone que ya hay una partida
 * guardada y se pregunta si se desea sobreescribir.
+* Los datos se almacenan linea a linea para sacarlos a un struct.
 *
 * @param tablero. Contiene el estado actual de la partida.
 *
@@ -348,17 +349,19 @@ string ponerFichaDer(string tablero, short int fichaN1, short int fichaN2){
 */
 bool salvarPartida(string tablero , short int numColocadas, short int numRobadas){
     bool partidaSalvada = false;
-    
-    if (comprobarPartida() == 'y') {
-        ofstream ficheroPartida;
 
+    if (confirmarBorrado() == 'y') {
+        ofstream ficheroPartida;
         ficheroPartida.open("game_history.txt");
 
-        ficheroPartida << tablero << "&" << numColocadas << "&" << numRobadas;
-
-        partidaSalvada = true;
+        //Se graban los datos linea a linea para posteriormente volcarlos a un struct
+        ficheroPartida << tablero << endl;
+        ficheroPartida << numColocadas << endl;
+        ficheroPartida << numRobadas << endl;
 
         ficheroPartida.close();
+
+        partidaSalvada = true;
     }
 
     return partidaSalvada;
@@ -371,17 +374,11 @@ bool salvarPartida(string tablero , short int numColocadas, short int numRobadas
  * @return true si existe el fichero, false si no
  */
 bool existePartida() {
-    bool existe = false;
     ifstream ficheroPartida;
 
     ficheroPartida.open("game_history.txt");
 
-    if (ficheroPartida.is_open()) {
-        existe = true;
-        ficheroPartida.close();
-    }
-
-    return existe;
+    return ficheroPartida.good();
 }
 
 
@@ -390,21 +387,18 @@ bool existePartida() {
 *
 * @return Char siendo 'y' que no existe o se quiere borrar y 'n' que se interrumpe la operacion.
 */
-char comprobarPartida() {
+char confirmarBorrado() {
     char borrarPartida = 'y';
     
     if (existePartida()) {
-        string s = recuperarPartida();
-        string x = s.substr(0, s.find('&'));
-        string y = s.substr(s.find('&') + 1, s.find_last_of('&')-s.find('&')-1);
-        string z = s.substr(x.length() + y.length() + 2, s.find('&'));
+        struct gameData newStruct = recuperarPartida();
 
-        
         cout << endl << "@@@@@@@@@@@@" << endl;
         cout << "@ ATENCION @" << endl;
         cout << "@@@@@@@@@@@@" << endl;
         cout << "Se ha encontrado una partida guardada con el siguiente estado: " << endl;
-        cout << "Tablero: " << x << "   Colocadas: " << y << "  Robadas: " << z << endl;
+        cout << "Tablero: " << newStruct.tablero << "   Colocadas: " << newStruct.numColocadas \
+        << "  Robadas: " << newStruct.numRobadas << endl;
         cout << "Seguro que desea sobrescribirla? (y/n): ";
         cin >> borrarPartida;
     }
@@ -416,22 +410,24 @@ char comprobarPartida() {
 /**
 * Recupera la partida guardada en un fichero.
 *
-* @return Cadena con el estado de la partida o excepción en error
+* @return Struct conteniendo todos los datos necesarios.
 */
-string recuperarPartida(){
-    string datosPartida;
-    //Declara el objeto con el fichero y comprueba si existe.
-    ifstream ficheroPartida;
+gameData recuperarPartida(){
+    struct gameData newStruct;
     
+    ifstream ficheroPartida;
     ficheroPartida.open("game_history.txt");
-
+    
     if (! ficheroPartida.is_open()) {
         throw runtime_error("No se pudo abrir el fichero con el historial. Compruebe si existe o si ha sido borrado.");
     }else {
-        getline(ficheroPartida, datosPartida);
+        //Recupera linea a linea los datos y los mete en la posición adecuada
+        ficheroPartida >> newStruct.tablero;
+        ficheroPartida >> newStruct.numColocadas;
+        ficheroPartida >> newStruct.numRobadas;
     }
 
     ficheroPartida.close();
 
-    return datosPartida;
+    return newStruct;
 }
