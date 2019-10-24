@@ -1,5 +1,6 @@
 /*
 * Domino realizado por Alejandro y Guillermo
+* Ambas partes extras realizadas
 *
 * Happy Coding! :)
 **/
@@ -18,7 +19,7 @@ using namespace std;
 int mostrarMenu();
 string fichaToStr(short int izquierda, short int derecha);
 void mostrarTablero(short int fichaN1, short int fichaN2, string tablero, int numColocadas, int numRobadas);
-short int aleat();
+short int aleat(short int numeroMaximo);
 string toStr(int n); // Se puede usar la implementada en C++11??
 bool puedePonerIzq(string tablero, short int fichaN1, short int fichaN2);
 bool puedePonerDer(string tablero, short int fichaN1, short int fichaN2);
@@ -41,11 +42,12 @@ int main() {
     short int opcionElegida;
     short int numColocadas = 0;
     short int numRobadas = 0;
-    short int fichaN1 = aleat();
-    short int fichaN2 = aleat();
+    short int varianteJuego = 6;
+    short int fichaN1 = aleat(varianteJuego);
+    short int fichaN2 = aleat(varianteJuego);
     bool haRobado;
     bool haColocado;
-    string tablero = fichaToStr(aleat(), aleat());
+    string tablero = fichaToStr(aleat(varianteJuego), aleat(varianteJuego));
 
     if(existePartida()) {
         char restaurar;
@@ -99,8 +101,8 @@ int main() {
             break;
         
         case 3:
-            fichaN1 = aleat();
-            fichaN2 = aleat();
+            fichaN1 = aleat(varianteJuego);
+            fichaN2 = aleat(varianteJuego);
             numRobadas++;
             haRobado = true;
             break;
@@ -115,6 +117,11 @@ int main() {
             }
 
             break;
+        
+        case 5:
+            cout << "Seleccione el número máximo que puede tomar una ficha (6-9):";
+            cin >> varianteJuego;
+            break;
 
         default:
             if (opcionElegida != 0) cout << opcionElegida << " no es una opción válida" << endl;
@@ -123,8 +130,8 @@ int main() {
 
         if (!haRobado)
         {
-            fichaN1 = aleat();
-            fichaN2 = aleat();
+            fichaN1 = aleat(varianteJuego);
+            fichaN2 = aleat(varianteJuego);
         }
         
 
@@ -150,6 +157,7 @@ int mostrarMenu() {
     cout << "2. Poner ficha por la derecha" << endl;
     cout << "3. Robar ficha nueva" << endl;
     cout << "4. Salvar partida a fichero" << endl;
+    cout << "5. Cambiar máximo de puntos de las piezas:" << endl;
     cout << "0. Salir" << endl << endl;
     cout << "Elija una opción: ";
 
@@ -173,7 +181,7 @@ int mostrarMenu() {
 string fichaToStr(short int izquierda, short int derecha){
     // Nos aseguramos de que hemos recibido un numero que está disponible como ficha.
     // Si no es así se devuelve una excepción y acaba el juego por inconcluencia.
-    if (izquierda > 6 || derecha > 6) throw invalid_argument("Los números de las fichas no pueden ser superiores a 6");
+    if (izquierda > 9 || derecha > 9) throw invalid_argument("Los números de las fichas no pueden ser superiores a 9");
 
     string fichaFinal = "|";
 
@@ -211,10 +219,10 @@ void mostrarTablero(short int fichaN1, short int fichaN2,
 *
 * @return Devuelve un entero dentro del rango 1-6
 */
-short int aleat(){
+short int aleat(short int numero){
     int numAleat;
     
-    numAleat = rand() % 6 + 1;
+    numAleat = rand() % numero + 1;
 
     return numAleat;
 }
