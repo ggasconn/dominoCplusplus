@@ -14,7 +14,7 @@
 
 using namespace std;
 
-struct gameData{
+struct datosPartida{
     string tablero;
     int numColocadas;
     int numRobadas;
@@ -33,7 +33,7 @@ string ponerFichaDer(string tablero, short int fichaN1, short int fichaN2);
 bool salvarPartida(string tablero, short int numColocadas, short int numRobadas);
 bool existePartida();
 char confirmarBorrado();
-gameData recuperarPartida();
+datosPartida recuperarPartida();
 
 
 /**
@@ -61,10 +61,10 @@ int main() {
         cin >> restaurar;
 
         if (restaurar == 'y') {
-            struct gameData newStruct = recuperarPartida();
-            tablero = newStruct.tablero;
-            numColocadas = newStruct.numColocadas;
-            numRobadas = newStruct.numRobadas;
+            struct datosPartida valores = recuperarPartida();
+            tablero = valores.tablero;
+            numColocadas = valores.numColocadas;
+            numRobadas = valores.numRobadas;
 
             cout << endl << ">>> Partida restaurada" << endl;
         }
@@ -390,14 +390,14 @@ char confirmarBorrado() {
     char borrarPartida = 'y';
     
     if (existePartida()) {
-        struct gameData newStruct = recuperarPartida();
+        struct datosPartida valores = recuperarPartida();
 
         cout << endl << "@@@@@@@@@@@@" << endl;
         cout << "@ ATENCION @" << endl;
         cout << "@@@@@@@@@@@@" << endl;
         cout << "Se ha encontrado una partida guardada con el siguiente estado: " << endl;
-        cout << "Tablero: " << newStruct.tablero << "   Colocadas: " << newStruct.numColocadas \
-        << "  Robadas: " << newStruct.numRobadas << endl;
+        cout << "Tablero: " << valores.tablero << "   Colocadas: " << valores.numColocadas \
+        << "  Robadas: " << valores.numRobadas << endl;
         cout << "Seguro que desea sobrescribirla? (y/n): ";
         cin >> borrarPartida;
     }
@@ -411,8 +411,8 @@ char confirmarBorrado() {
 *
 * @return Struct conteniendo todos los datos necesarios.
 */
-gameData recuperarPartida(){
-    struct gameData newStruct;
+datosPartida recuperarPartida(){
+    struct datosPartida valores;
     
     ifstream ficheroPartida;
     ficheroPartida.open("game_history.txt");
@@ -421,12 +421,12 @@ gameData recuperarPartida(){
         throw runtime_error("No se pudo abrir el fichero con el historial. Compruebe si existe o si ha sido borrado.");
     }else {
         //Recupera linea a linea los datos y los mete en la posición adecuada
-        ficheroPartida >> newStruct.tablero;
-        ficheroPartida >> newStruct.numColocadas;
-        ficheroPartida >> newStruct.numRobadas;
+        ficheroPartida >> valores.tablero;
+        ficheroPartida >> valores.numColocadas;
+        ficheroPartida >> valores.numRobadas;
     }
 
     ficheroPartida.close();
 
-    return newStruct;
+    return valores;
 }
