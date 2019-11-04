@@ -14,6 +14,13 @@
 
 using namespace std;
 
+//Colores para editar la terminal
+//Implementar estructura que contenga todos los colores
+string fgRojo = "\033[1;31m";
+string fgVerde = "\033[1;32m";
+string fgAzul = "\033[1;34m";
+string finColor = "\033[0m";
+
 struct datosPartida{
     string tablero;
     int numColocadas;
@@ -21,6 +28,7 @@ struct datosPartida{
 };
 
 //Prototipos de funciones a usar durante el programa
+void clear();
 int mostrarMenu();
 string fichaToStr(short int izquierda, short int derecha);
 void mostrarTablero(short int fichaN1, short int fichaN2, string tablero, int numColocadas, int numRobadas);
@@ -54,10 +62,12 @@ int main() {
     bool haColocado;
     string tablero = fichaToStr(aleat(varianteJuego), aleat(varianteJuego));
 
+    clear(); //Limpia la consola
+
     if(existePartida()) {
         char restaurar;
 
-        cout << "Se ha encontrado una partida guardada. ¿Quiere restaurarla? (y/n): ";
+        cout << fgAzul << "Se ha encontrado una partida guardada. ¿Quiere restaurarla? (y/n): " << finColor;
         cin >> restaurar;
 
         if (restaurar == 'y') {
@@ -66,7 +76,7 @@ int main() {
             numColocadas = valores.numColocadas;
             numRobadas = valores.numRobadas;
 
-            cout << endl << ">>> Partida restaurada" << endl;
+            cout << fgVerde << ">>> Partida restaurada" << finColor << endl << endl;
         }
     }
 
@@ -79,6 +89,8 @@ int main() {
 
         opcionElegida = mostrarMenu();
 
+        clear(); //Limpia la consola
+
         switch (opcionElegida)
         {
         case 1:
@@ -88,7 +100,7 @@ int main() {
                 haColocado = true;
             }else {
                 haRobado = true;
-                cout << ">>> No se puede colocar una ficha a la izquierda" << endl << endl;
+                cout << fgRojo << ">>> No se puede colocar una ficha a la izquierda" << finColor << endl << endl;
             }
             break;
         
@@ -99,7 +111,7 @@ int main() {
                 haColocado = true;
             }else {
                 haRobado = true;
-                cout << ">>> No se puede colocar una ficha a la derecha" << endl << endl;
+                cout << fgRojo << ">>> No se puede colocar una ficha a la derecha" << finColor << endl << endl;
             }
             break;
         
@@ -111,23 +123,26 @@ int main() {
             break;
         
         case 4:
-            cout << ">>> Salvando partida a fichero game_history.txt" << endl;
+            cout << fgVerde << ">>> Salvando partida a fichero game_history.txt" << finColor << endl;
             
             if (salvarPartida(tablero, numColocadas, numRobadas)) {
-                cout << endl << ">>> OK" << endl << endl;
+                cout << fgVerde << ">>> OK" << finColor << endl << endl;
             }else {
-                cout << endl << ">>> Error: no se pudo guardar la partida o se denegó la acción" << endl << endl;
+                cout << endl << fgRojo << ">>> Error: no se pudo guardar la partida o se denegó la acción" << finColor << endl << endl;
             }
 
             break;
         
         case 5:
-            cout << "Seleccione el número máximo que puede tomar una ficha (6-9):";
-            cin >> varianteJuego;
+            do {
+                cout << "Seleccione el número máximo que puede tomar una ficha (6-9):";
+                cin >> varianteJuego;
+            } while(varianteJuego < 6 || varianteJuego > 9);
+            
             break;
 
         default:
-            if (opcionElegida != 0) cout << opcionElegida << " no es una opción válida" << endl;
+            if (opcionElegida != 0) cout << fgRojo << opcionElegida << " no es una opción válida" << finColor << endl;
             break;
         }
 
@@ -144,6 +159,14 @@ int main() {
     } while(opcionElegida != 0);
 }
 
+/**
+ * Limpia la consola dependiendo del sistema operativo.
+ * No es la mejor manera de hacerlo.
+ * 
+ */
+ void clear() {
+    if (system("CLS")) system("clear");
+ }
 
 /**
 * Devuelve menu principal con opciones y recupera la elegida.
@@ -160,7 +183,7 @@ int mostrarMenu() {
     cout << "2. Poner ficha por la derecha" << endl;
     cout << "3. Robar ficha nueva" << endl;
     cout << "4. Salvar partida a fichero" << endl;
-    cout << "5. Cambiar máximo de puntos de las piezas:" << endl;
+    cout << "5. Cambiar máximo de puntos de las piezas" << endl;
     cout << "0. Salir" << endl << endl;
     cout << "Elija una opción: ";
 
@@ -392,12 +415,12 @@ char confirmarBorrado() {
     if (existePartida()) {
         struct datosPartida valores = recuperarPartida();
 
-        cout << endl << "@@@@@@@@@@@@" << endl;
-        cout << "@ ATENCION @" << endl;
-        cout << "@@@@@@@@@@@@" << endl;
+        cout << fgRojo << "@@@@@@@@@@@@" << finColor << endl;
+        cout << fgRojo << "@ ATENCION @" << finColor << endl;
+        cout << fgRojo << "@@@@@@@@@@@@" << finColor << endl;
         cout << "Se ha encontrado una partida guardada con el siguiente estado: " << endl;
-        cout << "Tablero: " << valores.tablero << "   Colocadas: " << valores.numColocadas \
-        << "  Robadas: " << valores.numRobadas << endl;
+        cout << fgAzul << "Tablero: " << valores.tablero << "   Colocadas: " << valores.numColocadas \
+        << "  Robadas: " << valores.numRobadas << finColor << endl;
         cout << "Seguro que desea sobrescribirla? (y/n): ";
         cin >> borrarPartida;
     }
