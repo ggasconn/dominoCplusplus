@@ -36,5 +36,13 @@ Repositorio para tener controlado por versiones y actualizado el código del eje
 - [x] La función ```recuperarPartida``` devuelve un uno antes de la cadena. *EDIT: compilando y ejecutando el Linux parece que deja de aparecer ese 1.
 
 ### Segunda versión
+- [x] Función generarPozo
+- [x] Función robarPozo
+- [ ] Función mostrarTablero
+- [ ] Función robarFicha
+- [ ] Función eliminarFicha
+- [ ] Función puedeColocarFicha
+- [ ] Función sumarPuntos
+- [ ] Eliminar variables y/o funciones obsoletas
 ### Tercera versión
 

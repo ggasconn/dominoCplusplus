@@ -29,12 +29,17 @@ struct datosPartida{
     int numRobadas;
 };
 
+const short int numFichas = 28;     //Numero de ficha disponibles
+typedef short int tArray[numFichas];
+
 //Prototipos de funciones a usar durante el programa
 void clear();
 int mostrarMenu();
 string fichaToStr(short int izquierda, short int derecha);
-void mostrarTablero(string tablero, short int numColocadas, short int numRobadas, \
-    const tArray fichas1, const tArray fichas2, short int fichasCont);short int aleat(short int numeroMaximo);
+void mostrarTablero(short int fichaN1, short int fichaN2, string tablero, int numColocadas, int numRobadas);
+//void mostrarTablero(string tablero, short int numColocadas, short int numRobadas, \
+//    const tArray fichas1, const tArray fichas2, short int fichasCont);short int aleat(short int numeroMaximo);
+short int aleat(short int numero);
 string toStr(int n); // Se puede usar la implementada en C++11??
 bool puedePonerIzq(string tablero, short int fichaN1, short int fichaN2);
 bool puedePonerDer(string tablero, short int fichaN1, short int fichaN2);
@@ -44,11 +49,12 @@ bool salvarPartida(string tablero, short int numColocadas, short int numRobadas)
 bool existePartida();
 char confirmarBorrado();
 datosPartida recuperarPartida();
-void generaPozo(tArray pozo1, tArray pozo2, int maxValor);
-void robaFicha(const tArray pozo1, const tArray pozo2, short int &cont, short int &fichaN1, short int &fichaN2);
-void eliminaFicha (tArray fichas1, tArray fichas2, short int &fichasCont, short int fichaNum);
+void generarPozo(tArray pozo1, tArray pozo2, int varianteJuego);
+void desordenarPozo(tArray pozo1, tArray pozo2);
+void robarFicha(const tArray pozo1, const tArray pozo2, short int &cont, short int &fichaN1, short int &fichaN2);
+void eliminarFicha (tArray fichas1, tArray fichas2, short int &fichasCont, short int fichaNum);
 bool puedeColocarFicha(const tArray fichas1, const tArray fichas2, short int fichasCont, string tablero);
-short int sumaPuntos(const tArray fichas1, const tArray fichas2, short int fichasCont);
+short int sumarPuntos(const tArray fichas1, const tArray fichas2, short int fichasCont);
 
 
 /**
@@ -67,7 +73,21 @@ int main() {
     short int fichaN2 = aleat(varianteJuego);
     bool haRobado;
     bool haColocado;
+    bool salir = false;
     string tablero = fichaToStr(aleat(varianteJuego), aleat(varianteJuego));
+
+    //Variables v2
+    //TODO: reordenar y elimnar no necesarias al acabar
+    tArray pozo1;
+    tArray pozo2;
+    tArray fichas1;
+    tArray fichas2;
+    short int pozoCont;
+    short int fichasCont;
+
+    //Llena el pozo y lo desordena
+    generarPozo(pozo1, pozo2, varianteJuego);
+    desordenarPozo(pozo1, pozo2);
 
     clear(); //Limpia la consola
 
@@ -86,14 +106,13 @@ int main() {
             cout << fgVerde << ">>> Partida restaurada" << finColor << endl << endl;
         }
     }
-
-    //Mostrar tablero
-    mostrarTablero(fichaN1, fichaN2, tablero, numColocadas, numRobadas);
    
     do {
         bool haRobado = false;
         bool haColocado = false;
 
+        //Muestra el tablero y el menu
+        mostrarTablero(fichaN1, fichaN2, tablero, numColocadas, numRobadas);
         opcionElegida = mostrarMenu();
 
         clear(); //Limpia la consola
@@ -149,7 +168,7 @@ int main() {
             break;
 
         default:
-            if (opcionElegida != 0) cout << fgRojo << opcionElegida << " no es una opción válida" << finColor << endl;
+            if (1 > opcionElegida > 5) cout << fgRojo << opcionElegida << " no es una opción válida" << finColor << endl;
             break;
         }
 
@@ -163,7 +182,7 @@ int main() {
         //Mostrar tablero
         mostrarTablero(fichaN1, fichaN2, tablero, numColocadas, numRobadas);
 
-    } while(opcionElegida != 0);
+    } while(!salir);
 }
 
 /**
@@ -191,7 +210,6 @@ int mostrarMenu() {
     cout << "3. Robar ficha nueva" << endl;
     cout << "4. Salvar partida a fichero" << endl;
     cout << "5. Cambiar máximo de puntos de las piezas" << endl;
-    cout << "0. Salir" << endl << endl;
     cout << "Elija una opción: ";
 
     cin >> opcionElegida;
@@ -250,12 +268,12 @@ void mostrarTablero(short int fichaN1, short int fichaN2,
 /**
 * Devuelve un entero aleatorio entre 1 y 6
 *
-* @return Devuelve un entero dentro del rango 1-6
+* @return Devuelve un entero dentro del rango 0-numero
 */
 short int aleat(short int numero){
     int numAleat;
     
-    numAleat = rand() % numero + 1;
+    numAleat = rand() % numero;
 
     return numAleat;
 }
@@ -463,13 +481,57 @@ datosPartida recuperarPartida(){
 
 
 /**
+* Popula dos arrays con las fichas generadas. El array pozo1 se llena con 
+* los numeros izquierdos de las fiches y el pozo2 los numeros de la derecha.
+*
+* @param pozo1. Array que contiene los numeros izquierdos de las fichas
+* @param pozo2. Array que contiene los numeros derechos de las fichas
+*/
+void generarPozo(tArray pozo1, tArray pozo2, int varianteJuego) {
+    short int cont = 0; //Sirve de indice para almacenar el los arrays
+
+    for (int i=0; i <= varianteJuego; i++) {
+        for (int x=i; x <= varianteJuego; x++) {
+            pozo1[cont] = i;
+            pozo2[cont] = x;
+            cont++;
+        }
+    }
+}
+
+
+/**
+* Desordena mediante el algoritmo de Fisher-Yates los dos arrays de manera
+* no sesgaga.
+*
+* @param pozo1. Array que contiene los numeros izquierdos de las fichas
+* @param pozo2. Array que contiene los numeros derechos de las fichas
+*/
+void desordenarPozo(tArray pozo1, tArray pozo2) {
+    int idx, i;
+    short int tmp1, tmp2;
+        for (int i = numFichas - 1; i >= 0; i--) {
+            idx = rand() % (i + 1);
+            if (i != idx) {
+                tmp1 = pozo1[i];
+                tmp2 = pozo2[i];
+                pozo1[i] = pozo1[idx];
+                pozo2[i] = pozo2[idx];
+                pozo1[idx] = tmp1;
+                pozo2[idx] = tmp2;
+            }
+        }
+}
+
+
+/**
 * Breve explicación
 *
 * @param
 *
 * @return
 */
-void generaPozo(tArray pozo1, tArray pozo2, int maxValor) {
+void robarFicha(const tArray pozo1, const tArray pozo2, short int &cont, short int &fichaN1, short int &fichaN2) {
 
 }
 
@@ -481,19 +543,7 @@ void generaPozo(tArray pozo1, tArray pozo2, int maxValor) {
 *
 * @return
 */
-void robaFicha(const tArray pozo1, const tArray pozo2, short int &cont, short int &fichaN1, short int &fichaN2) {
-
-}
-
-
-/**
-* Breve explicación
-*
-* @param
-*
-* @return
-*/
-void eliminaFicha (tArray fichas1, tArray fichas2, short int &fichasCont, short int fichaNum) {
+void eliminarFicha (tArray fichas1, tArray fichas2, short int &fichasCont, short int fichaNum) {
 
 }
 
@@ -517,7 +567,7 @@ bool puedeColocarFicha(const tArray fichas1, const tArray fichas2, short int fic
 *
 * @return
 */
-short int sumaPuntos(const tArray fichas1, const tArray fichas2, short int fichasCont) {
+short int sumarPuntos(const tArray fichas1, const tArray fichas2, short int fichasCont) {
     
 }
 
