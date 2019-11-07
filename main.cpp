@@ -119,6 +119,8 @@ int main() {
 
         switch (opcionElegida)
         {
+        case 0:
+            salir = true;
         case 1:
             if (puedePonerIzq(tablero, fichaN1, fichaN2)) {
                 tablero = ponerFichaIzq(tablero, fichaN1, fichaN2);
@@ -177,11 +179,6 @@ int main() {
             fichaN1 = aleat(varianteJuego);
             fichaN2 = aleat(varianteJuego);
         }
-        
-
-        //Mostrar tablero
-        mostrarTablero(fichaN1, fichaN2, tablero, numColocadas, numRobadas);
-
     } while(!salir);
 }
 
@@ -210,6 +207,7 @@ int mostrarMenu() {
     cout << "3. Robar ficha nueva" << endl;
     cout << "4. Salvar partida a fichero" << endl;
     cout << "5. Cambiar máximo de puntos de las piezas" << endl;
+    cout << "0. Salir" << endl;
     cout << "Elija una opción: ";
 
     cin >> opcionElegida;
