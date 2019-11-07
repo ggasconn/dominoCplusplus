@@ -1,4 +1,6 @@
 /*
+* Version: 2.0
+*
 * Domino realizado por Alejandro y Guillermo
 * Ambas partes extras realizadas
 *
@@ -31,8 +33,8 @@ struct datosPartida{
 void clear();
 int mostrarMenu();
 string fichaToStr(short int izquierda, short int derecha);
-void mostrarTablero(short int fichaN1, short int fichaN2, string tablero, int numColocadas, int numRobadas);
-short int aleat(short int numeroMaximo);
+void mostrarTablero(string tablero, short int numColocadas, short int numRobadas, \
+    const tArray fichas1, const tArray fichas2, short int fichasCont);short int aleat(short int numeroMaximo);
 string toStr(int n); // Se puede usar la implementada en C++11??
 bool puedePonerIzq(string tablero, short int fichaN1, short int fichaN2);
 bool puedePonerDer(string tablero, short int fichaN1, short int fichaN2);
@@ -42,6 +44,11 @@ bool salvarPartida(string tablero, short int numColocadas, short int numRobadas)
 bool existePartida();
 char confirmarBorrado();
 datosPartida recuperarPartida();
+void generaPozo(tArray pozo1, tArray pozo2, int maxValor);
+void robaFicha(const tArray pozo1, const tArray pozo2, short int &cont, short int &fichaN1, short int &fichaN2);
+void eliminaFicha (tArray fichas1, tArray fichas2, short int &fichasCont, short int fichaNum);
+bool puedeColocarFicha(const tArray fichas1, const tArray fichas2, short int fichasCont, string tablero);
+short int sumaPuntos(const tArray fichas1, const tArray fichas2, short int fichasCont);
 
 
 /**
@@ -453,3 +460,64 @@ datosPartida recuperarPartida(){
 
     return valores;
 }
+
+
+/**
+* Breve explicación
+*
+* @param
+*
+* @return
+*/
+void generaPozo(tArray pozo1, tArray pozo2, int maxValor) {
+
+}
+
+
+/**
+* Breve explicación
+*
+* @param
+*
+* @return
+*/
+void robaFicha(const tArray pozo1, const tArray pozo2, short int &cont, short int &fichaN1, short int &fichaN2) {
+
+}
+
+
+/**
+* Breve explicación
+*
+* @param
+*
+* @return
+*/
+void eliminaFicha (tArray fichas1, tArray fichas2, short int &fichasCont, short int fichaNum) {
+
+}
+
+
+/**
+* Breve explicación
+*
+* @param
+*
+* @return
+*/
+bool puedeColocarFicha(const tArray fichas1, const tArray fichas2, short int fichasCont, string tablero) {
+
+}
+
+
+/**
+* Breve explicación
+*
+* @param
+*
+* @return
+*/
+short int sumaPuntos(const tArray fichas1, const tArray fichas2, short int fichasCont) {
+    
+}
+
