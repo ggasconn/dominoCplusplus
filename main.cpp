@@ -36,19 +36,15 @@ typedef short int tArray[numFichas];
 void clear();
 int mostrarMenu();
 string fichaToStr(short int izquierda, short int derecha);
-void mostrarTablero(short int fichaN1, short int fichaN2, string tablero, int numColocadas, int numRobadas);
-//void mostrarTablero(string tablero, short int numColocadas, short int numRobadas, \
-//    const tArray fichas1, const tArray fichas2, short int fichasCont);short int aleat(short int numeroMaximo);
+//void mostrarTablero(short int fichaN1, short int fichaN2, string tablero, int numColocadas, int numRobadas);
+void mostrarTablero(string tablero, short int numColocadas, short int numRobadas, \
+    const tArray fichas1, const tArray fichas2, short int fichasCont);
 short int aleat(short int numero);
 string toStr(int n); // Se puede usar la implementada en C++11??
 bool puedePonerIzq(string tablero, short int fichaN1, short int fichaN2);
 bool puedePonerDer(string tablero, short int fichaN1, short int fichaN2);
 string ponerFichaIzq(string tablero, short int fichaN1, short int fichaN2);
 string ponerFichaDer(string tablero, short int fichaN1, short int fichaN2);
-bool salvarPartida(string tablero, short int numColocadas, short int numRobadas);
-bool existePartida();
-char confirmarBorrado();
-datosPartida recuperarPartida();
 void generarPozo(tArray pozo1, tArray pozo2, int varianteJuego);
 void desordenarPozo(tArray pozo1, tArray pozo2);
 void robarFicha(const tArray pozo1, const tArray pozo2, short int &cont, short int &fichaN1, short int &fichaN2);
@@ -69,12 +65,9 @@ int main() {
     short int numColocadas = 0;
     short int numRobadas = 0;
     short int varianteJuego = 6;
-    short int fichaN1 = aleat(varianteJuego);
-    short int fichaN2 = aleat(varianteJuego);
     bool haRobado;
     bool haColocado;
     bool salir = false;
-    string tablero = fichaToStr(aleat(varianteJuego), aleat(varianteJuego));
 
     //Variables v2
     //TODO: reordenar y elimnar no necesarias al acabar
@@ -82,83 +75,87 @@ int main() {
     tArray pozo2;
     tArray fichas1;
     tArray fichas2;
-    short int pozoCont;
+    short int fichaN1;
+    short int fichaN2;
+    short int pozoCont = numFichas - 1;
     short int fichasCont;
+    short int fichaNum;
+    string tablero;
 
     //Llena el pozo y lo desordena
     generarPozo(pozo1, pozo2, varianteJuego);
     desordenarPozo(pozo1, pozo2);
+    robarFicha(pozo1, pozo2, pozoCont, fichaN1, fichaN2);
+    tablero = fichaToStr(fichaN1, fichaN2);
+
+    for (int i=0; i <= 6; i++) {
+        robarFicha(pozo1, pozo2, pozoCont, fichaN1, fichaN2);
+        fichas1[i] = fichaN1;
+        fichas2[i] = fichaN2;
+        fichasCont++;
+    }
 
     clear(); //Limpia la consola
-
-    if(existePartida()) {
-        char restaurar;
-
-        cout << fgAzul << "Se ha encontrado una partida guardada. ¿Quiere restaurarla? (y/n): " << finColor;
-        cin >> restaurar;
-
-        if (restaurar == 'y') {
-            struct datosPartida valores = recuperarPartida();
-            tablero = valores.tablero;
-            numColocadas = valores.numColocadas;
-            numRobadas = valores.numRobadas;
-
-            cout << fgVerde << ">>> Partida restaurada" << finColor << endl << endl;
-        }
-    }
    
     do {
         bool haRobado = false;
         bool haColocado = false;
 
         //Muestra el tablero y el menu
-        mostrarTablero(fichaN1, fichaN2, tablero, numColocadas, numRobadas);
+        mostrarTablero(tablero, numColocadas, numRobadas, fichas1, fichas2, fichasCont);
         opcionElegida = mostrarMenu();
-
-        clear(); //Limpia la consola
 
         switch (opcionElegida)
         {
         case 0:
             salir = true;
         case 1:
-            if (puedePonerIzq(tablero, fichaN1, fichaN2)) {
-                tablero = ponerFichaIzq(tablero, fichaN1, fichaN2);
-                numColocadas++;
-                haColocado = true;
-            }else {
-                haRobado = true;
-                cout << fgRojo << ">>> No se puede colocar una ficha a la izquierda" << finColor << endl << endl;
+            cout << "¿Qué ficha quieres colocar? (1-" << fichasCont << "): ";
+            cin >> fichaNum;
+
+            if (0 < fichaNum || fichaNum <= fichasCont) {
+                fichaN1 = fichas1[fichaNum - 1];
+                fichaN2 = fichas2[fichaNum - 1];
+
+                if (puedePonerIzq(tablero, fichaN1, fichaN2)) {
+                    tablero = ponerFichaIzq(tablero, fichaN1, fichaN2);
+                    numColocadas++;
+                    haColocado = true;
+                    eliminarFicha(fichas1, fichas2, fichasCont, fichaNum);
+                }else {
+                    haRobado = true;
+                    cout << fgRojo << ">>> No se puede colocar una ficha a la izquierda" << finColor << endl << endl;
+                }
             }
             break;
         
         case 2:
-            if (puedePonerDer(tablero, fichaN1, fichaN2)) {
-                tablero = ponerFichaDer(tablero, fichaN1, fichaN2);
-                numColocadas++;
-                haColocado = true;
-            }else {
-                haRobado = true;
-                cout << fgRojo << ">>> No se puede colocar una ficha a la derecha" << finColor << endl << endl;
+            cout << "¿Qué ficha quieres colocar? (1-" << fichasCont << "): ";
+            cin >> fichaNum;
+
+            if (0 < fichaNum || fichaNum <= fichasCont) {
+                fichaN1 = fichas1[fichaNum - 1];
+                fichaN2 = fichas2[fichaNum - 1];
+
+                if (puedePonerDer(tablero, fichaN1, fichaN2)) {
+                    tablero = ponerFichaDer(tablero, fichaN1, fichaN2);
+                    numColocadas++;
+                    haColocado = true;
+                    eliminarFicha(fichas1, fichas2, fichasCont, fichaNum);
+                }else {
+                    haRobado = true;
+                    cout << fgRojo << ">>> No se puede colocar una ficha a la derecha" << finColor << endl << endl;
+                }
             }
             break;
         
         case 3:
-            fichaN1 = aleat(varianteJuego);
-            fichaN2 = aleat(varianteJuego);
+            robarFicha(pozo1, pozo2, pozoCont, fichaN1, fichaN2);
             numRobadas++;
             haRobado = true;
             break;
         
         case 4:
-            cout << fgVerde << ">>> Salvando partida a fichero game_history.txt" << finColor << endl;
-            
-            if (salvarPartida(tablero, numColocadas, numRobadas)) {
-                cout << fgVerde << ">>> OK" << finColor << endl << endl;
-            }else {
-                cout << endl << fgRojo << ">>> Error: no se pudo guardar la partida o se denegó la acción" << finColor << endl << endl;
-            }
-
             break;
         
         case 5:
@@ -170,15 +167,26 @@ int main() {
             break;
 
         default:
-            if (1 > opcionElegida > 5) cout << fgRojo << opcionElegida << " no es una opción válida" << finColor << endl;
+            if (1 > opcionElegida || opcionElegida > 5) cout << fgRojo << opcionElegida << " no es una opción válida" << finColor << endl;
             break;
         }
 
         if (!haRobado)
         {
-            fichaN1 = aleat(varianteJuego);
-            fichaN2 = aleat(varianteJuego);
+            robarFicha(pozo1, pozo2, pozoCont, fichaN1, fichaN2);
+
         }
+
+        for (const auto& e : pozo1) {
+            cout << e;
+        }
+        cout << endl;
+        for (const auto& e : pozo2) {
+            cout << e;
+        }
+        cout << endl << endl;
+        cout << "FichaN1: " << fichaN1 << endl;
+        cout << "FichaN2: " << fichaN2 << endl;
     } while(!salir);
 }
 
@@ -252,14 +260,20 @@ string fichaToStr(short int izquierda, short int derecha){
 * @return La funcion no devuelve nada, pero durante la ejecución
 * va imprimiendo el tablero con los datos recibidos
 */
-void mostrarTablero(short int fichaN1, short int fichaN2, 
-                    string tablero, int numColocadas, int numRobadas){
+void mostrarTablero(string tablero, short int numColocadas, short int numRobadas, \
+                        const tArray fichas1, const tArray fichas2, short int fichasCont) {
     cout << " ------------------" << endl;
     cout << "|     TABLERO      |" << endl;
     cout << " ------------------" << endl;
     cout << tablero << endl;
     cout << "Fichas colocadas: " << numColocadas << " - Fichas robadas: " << numRobadas << endl;
-    cout << "Ficha jugador: " << fichaToStr(fichaN1, fichaN2) << endl << endl;
+    cout << "Fichas jugador: ";
+
+    for (int i=0; i<=fichasCont-1; i++) {
+        cout << "|" << fichas1[i] << "-" << fichas2[i] << "|";
+    }
+
+    cout << endl;
 }
 
 
@@ -383,102 +397,6 @@ string ponerFichaDer(string tablero, short int fichaN1, short int fichaN2){
 
 
 /**
-* Recibe como parámetro una cadena que guarda en un fichero.
-* Si el fichero previamente existe se supone que ya hay una partida
-* guardada y se pregunta si se desea sobreescribir.
-* Los datos se almacenan linea a linea para sacarlos a un struct.
-*
-* @param tablero. Contiene el estado actual de la partida.
-*
-* @return Devuelve true si la partida se guardo, false si no.
-*/
-bool salvarPartida(string tablero , short int numColocadas, short int numRobadas){
-    bool partidaSalvada = false;
-
-    if (confirmarBorrado() == 'y') {
-        ofstream ficheroPartida;
-        ficheroPartida.open("game_history.txt");
-
-        //Se graban los datos linea a linea para posteriormente volcarlos a un struct
-        ficheroPartida << tablero << endl;
-        ficheroPartida << numColocadas << endl;
-        ficheroPartida << numRobadas << endl;
-
-        ficheroPartida.close();
-
-        partidaSalvada = true;
-    }
-
-    return partidaSalvada;
-}
-
-
-/**
- * Comprueba si existe un fichero con una partida ya guardada.
- * 
- * @return true si existe el fichero, false si no
- */
-bool existePartida() {
-    ifstream ficheroPartida;
-
-    ficheroPartida.open("game_history.txt");
-
-    return ficheroPartida.good();
-}
-
-
-/**
-* Comprueba si existe una partida guardada y pregunta si se quiere sobreescribir.
-*
-* @return Char siendo 'y' que no existe o se quiere borrar y 'n' que se interrumpe la operacion.
-*/
-char confirmarBorrado() {
-    char borrarPartida = 'y';
-    
-    if (existePartida()) {
-        struct datosPartida valores = recuperarPartida();
-
-        cout << fgRojo << "@@@@@@@@@@@@" << finColor << endl;
-        cout << fgRojo << "@ ATENCION @" << finColor << endl;
-        cout << fgRojo << "@@@@@@@@@@@@" << finColor << endl;
-        cout << "Se ha encontrado una partida guardada con el siguiente estado: " << endl;
-        cout << fgAzul << "Tablero: " << valores.tablero << "   Colocadas: " << valores.numColocadas \
-        << "  Robadas: " << valores.numRobadas << finColor << endl;
-        cout << "Seguro que desea sobrescribirla? (y/n): ";
-        cin >> borrarPartida;
-    }
-
-    return borrarPartida;
-}
-
-
-/**
-* Recupera la partida guardada en un fichero.
-*
-* @return Struct conteniendo todos los datos necesarios.
-*/
-datosPartida recuperarPartida(){
-    struct datosPartida valores;
-    
-    ifstream ficheroPartida;
-    ficheroPartida.open("game_history.txt");
-    
-    if (! ficheroPartida.is_open()) {
-        throw runtime_error("No se pudo abrir el fichero con el historial. Compruebe si existe o si ha sido borrado.");
-    }else {
-        //Recupera linea a linea los datos y los mete en la posición adecuada
-        ficheroPartida >> valores.tablero;
-        ficheroPartida >> valores.numColocadas;
-        ficheroPartida >> valores.numRobadas;
-    }
-
-    ficheroPartida.close();
-
-    return valores;
-}
-
-
-/**
 * Popula dos arrays con las fichas generadas. El array pozo1 se llena con 
 * los numeros izquierdos de las fiches y el pozo2 los numeros de la derecha.
 *
@@ -530,7 +448,9 @@ void desordenarPozo(tArray pozo1, tArray pozo2) {
 * @return
 */
 void robarFicha(const tArray pozo1, const tArray pozo2, short int &cont, short int &fichaN1, short int &fichaN2) {
-
+    fichaN1 = pozo1[cont];
+    fichaN2 = pozo2[cont];
+    cont--;
 }
 
 
@@ -542,7 +462,10 @@ void robarFicha(const tArray pozo1, const tArray pozo2, short int &cont, short i
 * @return
 */
 void eliminarFicha (tArray fichas1, tArray fichas2, short int &fichasCont, short int fichaNum) {
-
+    for (int i = fichaNum - 1; i < fichasCont - 2 ; i++) {
+        fichas1[i] = fichas1[i+1];
+    }
+    fichasCont--;
 }
 
 
