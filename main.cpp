@@ -51,7 +51,6 @@ int main() {
     short int fichaN1 = aleat(varianteJuego);
     short int fichaN2 = aleat(varianteJuego);
     bool haRobado;
-    bool haColocado;
     string tablero = fichaToStr(aleat(varianteJuego), aleat(varianteJuego));
 
     if(existePartida()) {
@@ -75,7 +74,6 @@ int main() {
    
     do {
         bool haRobado = false;
-        bool haColocado = false;
 
         opcionElegida = mostrarMenu();
 
@@ -85,7 +83,6 @@ int main() {
             if (puedePonerIzq(tablero, fichaN1, fichaN2)) {
                 tablero = ponerFichaIzq(tablero, fichaN1, fichaN2);
                 numColocadas++;
-                haColocado = true;
             }else {
                 haRobado = true;
                 cout << ">>> No se puede colocar una ficha a la izquierda" << endl << endl;
@@ -96,7 +93,6 @@ int main() {
             if (puedePonerDer(tablero, fichaN1, fichaN2)) {
                 tablero = ponerFichaDer(tablero, fichaN1, fichaN2);
                 numColocadas++;
-                haColocado = true;
             }else {
                 haRobado = true;
                 cout << ">>> No se puede colocar una ficha a la derecha" << endl << endl;
