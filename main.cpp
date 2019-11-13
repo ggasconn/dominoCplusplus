@@ -39,7 +39,6 @@ string fichaToStr(short int izquierda, short int derecha);
 //void mostrarTablero(short int fichaN1, short int fichaN2, string tablero, int numColocadas, int numRobadas);
 void mostrarTablero(string tablero, short int numColocadas, short int numRobadas, \
     const tArray fichas1, const tArray fichas2, short int fichasCont);
-short int aleat(short int numero);
 string toStr(int n); // Se puede usar la implementada en C++11??
 bool puedePonerIzq(string tablero, short int fichaN1, short int fichaN2);
 bool puedePonerDer(string tablero, short int fichaN1, short int fichaN2);
@@ -109,6 +108,8 @@ int main() {
         {
         case 0:
             salir = true;
+            break;
+            
         case 1:
             cout << "¿Qué ficha quieres colocar? (1-" << fichasCont << "): ";
             cin >> fichaNum;
@@ -150,9 +151,15 @@ int main() {
             break;
         
         case 3:
-            robarFicha(pozo1, pozo2, pozoCont, fichaN1, fichaN2);
-            numRobadas++;
-            haRobado = true;
+            if (puedeColocarFicha(fichas1, fichas2, fichasCont, tablero)) {
+                cout << fgRojo << "Áun puedes colocar fichas" << finColor << endl;
+            }else if (pozoCont == 0) {
+                salir = true;
+            }else {
+                robarFicha(pozo1, pozo2, pozoCont, fichaN1, fichaN2);
+                numRobadas++;
+                haRobado = true;
+            }
             break;
         
         case 4:
@@ -165,28 +172,27 @@ int main() {
             } while(varianteJuego < 6 || varianteJuego > 9);
             
             break;
-
+        
         default:
             if (1 > opcionElegida || opcionElegida > 5) cout << fgRojo << opcionElegida << " no es una opción válida" << finColor << endl;
             break;
         }
 
-        if (!haRobado)
-        {
+        if (fichasCont == 0) {
+            cout << fgVerde << "Has ganado!!" << finColor << endl;
+            salir = true;
+        }
+
+        if (!puedeColocarFicha(fichas1, fichas2, fichasCont, tablero) && pozoCont == 0) {
+            cout << fgRojo << "No se pueden robar más fichas" << finColor << endl;
+            cout << fgRojo << "Los puntos totales son: " << finColor;
+            cout << fgVerde << sumarPuntos(fichas1, fichas2, fichasCont) << finColor << endl;
+            salir = true;
+        }
+
+        if (!haRobado) {
             robarFicha(pozo1, pozo2, pozoCont, fichaN1, fichaN2);
-
         }
-
-        for (const auto& e : pozo1) {
-            cout << e;
-        }
-        cout << endl;
-        for (const auto& e : pozo2) {
-            cout << e;
-        }
-        cout << endl << endl;
-        cout << "FichaN1: " << fichaN1 << endl;
-        cout << "FichaN2: " << fichaN2 << endl;
     } while(!salir);
 }
 
@@ -274,20 +280,6 @@ void mostrarTablero(string tablero, short int numColocadas, short int numRobadas
     }
 
     cout << endl;
-}
-
-
-/**
-* Devuelve un entero aleatorio entre 1 y 6
-*
-* @return Devuelve un entero dentro del rango 0-numero
-*/
-short int aleat(short int numero){
-    int numAleat;
-    
-    numAleat = rand() % numero;
-
-    return numAleat;
 }
 
 
@@ -404,7 +396,7 @@ string ponerFichaDer(string tablero, short int fichaN1, short int fichaN2){
 * @param pozo2. Array que contiene los numeros derechos de las fichas
 */
 void generarPozo(tArray pozo1, tArray pozo2, int varianteJuego) {
-    short int cont = 0; //Sirve de indice para almacenar el los arrays
+    short int cont = 0; //Sirve de indice para almacenar en los arrays
 
     for (int i=0; i <= varianteJuego; i++) {
         for (int x=i; x <= varianteJuego; x++) {
@@ -477,7 +469,19 @@ void eliminarFicha (tArray fichas1, tArray fichas2, short int &fichasCont, short
 * @return
 */
 bool puedeColocarFicha(const tArray fichas1, const tArray fichas2, short int fichasCont, string tablero) {
+    bool puedePoner = false;
+    short int cont;
+    short int extremoIzquierda =  int(tablero[1]) - int('0');
+    short int extremoDerecha = int(tablero[tablero.size() - 2]) - int('0');
 
+    while(!puedePoner && cont < fichasCont) {
+        if (fichas1[cont] == extremoIzquierda || fichas2[cont] == extremoDerecha) {
+            puedePoner = true;
+        }
+        cont++;
+    }
+
+    return puedePoner;
 }
 
 
@@ -489,6 +493,13 @@ bool puedeColocarFicha(const tArray fichas1, const tArray fichas2, short int fic
 * @return
 */
 short int sumarPuntos(const tArray fichas1, const tArray fichas2, short int fichasCont) {
-    
+    short int sumaPuntos;
+
+    for (int i=0; i<=fichasCont; i++) {
+        sumaPuntos += fichas1[i];
+        sumaPuntos += fichas2[i];
+    }
+
+    return sumaPuntos;
 }
 

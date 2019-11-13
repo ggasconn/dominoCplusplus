@@ -38,11 +38,13 @@ Repositorio para tener controlado por versiones y actualizado el código del eje
 ### Segunda versión
 - [x] Función generarPozo
 - [x] Función robarPozo
-- [ ] Función mostrarTablero
-- [ ] Función robarFicha
-- [ ] Función eliminarFicha
-- [ ] Función puedeColocarFicha
-- [ ] Función sumarPuntos
+- [x] Función mostrarTablero
+- [x] Función robarFicha
+- [x] Función eliminarFicha
+- [x] Función puedeColocarFicha
+- [x] Función sumarPuntos
 - [ ] Eliminar variables y/o funciones obsoletas
+- [ ] Revisar código y bugs. Duplica fichas algunas veces después de poner.
+
 ### Tercera versión
 
