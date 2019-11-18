@@ -45,6 +45,7 @@ Repositorio para tener controlado por versiones y actualizado el código del eje
 - [x] Función sumarPuntos
 - [ ] Eliminar variables y/o funciones obsoletas
 - [ ] Revisar código y bugs. Duplica fichas algunas veces después de poner.
+- [ ] Revisar función sumarPuntos
 
 ### Tercera versión
 

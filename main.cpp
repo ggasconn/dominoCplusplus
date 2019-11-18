@@ -64,10 +64,7 @@ int main() {
     short int numColocadas = 0;
     short int numRobadas = 0;
     short int varianteJuego = 6;
-    bool haRobado;
-    bool haColocado;
-    bool salir = false;
-
+    
     //Variables v2
     //TODO: reordenar y elimnar no necesarias al acabar
     tArray pozo1;
@@ -77,14 +74,16 @@ int main() {
     short int fichaN1;
     short int fichaN2;
     short int pozoCont = numFichas - 1;
-    short int fichasCont;
+    short int fichasCont = 0;
     short int fichaNum;
     string tablero;
+    bool salir = false;
 
     //Llena el pozo y lo desordena
     generarPozo(pozo1, pozo2, varianteJuego);
     desordenarPozo(pozo1, pozo2);
     robarFicha(pozo1, pozo2, pozoCont, fichaN1, fichaN2);
+    numRobadas++;
     tablero = fichaToStr(fichaN1, fichaN2);
 
     for (int i=0; i <= 6; i++) {
@@ -92,14 +91,12 @@ int main() {
         fichas1[i] = fichaN1;
         fichas2[i] = fichaN2;
         fichasCont++;
+        numRobadas++;
     }
 
     clear(); //Limpia la consola
    
     do {
-        bool haRobado = false;
-        bool haColocado = false;
-
         //Muestra el tablero y el menu
         mostrarTablero(tablero, numColocadas, numRobadas, fichas1, fichas2, fichasCont);
         opcionElegida = mostrarMenu();
@@ -121,10 +118,8 @@ int main() {
                 if (puedePonerIzq(tablero, fichaN1, fichaN2)) {
                     tablero = ponerFichaIzq(tablero, fichaN1, fichaN2);
                     numColocadas++;
-                    haColocado = true;
                     eliminarFicha(fichas1, fichas2, fichasCont, fichaNum);
                 }else {
-                    haRobado = true;
                     cout << fgRojo << ">>> No se puede colocar una ficha a la izquierda" << finColor << endl << endl;
                 }
             }
@@ -141,10 +136,8 @@ int main() {
                 if (puedePonerDer(tablero, fichaN1, fichaN2)) {
                     tablero = ponerFichaDer(tablero, fichaN1, fichaN2);
                     numColocadas++;
-                    haColocado = true;
                     eliminarFicha(fichas1, fichas2, fichasCont, fichaNum);
                 }else {
-                    haRobado = true;
                     cout << fgRojo << ">>> No se puede colocar una ficha a la derecha" << finColor << endl << endl;
                 }
             }
@@ -152,13 +145,15 @@ int main() {
         
         case 3:
             if (puedeColocarFicha(fichas1, fichas2, fichasCont, tablero)) {
-                cout << fgRojo << "Áun puedes colocar fichas" << finColor << endl;
+                cout << fgRojo << ">>> Áun puedes colocar fichas" << finColor << endl;
             }else if (pozoCont == 0) {
                 salir = true;
             }else {
                 robarFicha(pozo1, pozo2, pozoCont, fichaN1, fichaN2);
+                fichas1[fichasCont] = fichaN1;
+                fichas2[fichasCont] = fichaN2;
+                fichasCont++;
                 numRobadas++;
-                haRobado = true;
             }
             break;
         
@@ -188,10 +183,6 @@ int main() {
             cout << fgRojo << "Los puntos totales son: " << finColor;
             cout << fgVerde << sumarPuntos(fichas1, fichas2, fichasCont) << finColor << endl;
             salir = true;
-        }
-
-        if (!haRobado) {
-            robarFicha(pozo1, pozo2, pozoCont, fichaN1, fichaN2);
         }
     } while(!salir);
 }
@@ -454,8 +445,9 @@ void robarFicha(const tArray pozo1, const tArray pozo2, short int &cont, short i
 * @return
 */
 void eliminarFicha (tArray fichas1, tArray fichas2, short int &fichasCont, short int fichaNum) {
-    for (int i = fichaNum - 1; i < fichasCont - 2 ; i++) {
+    for (int i = fichaNum - 1; i <= fichasCont - 2 ; i++) {
         fichas1[i] = fichas1[i+1];
+        fichas2[i] = fichas2[i+1];
     }
     fichasCont--;
 }
@@ -493,13 +485,12 @@ bool puedeColocarFicha(const tArray fichas1, const tArray fichas2, short int fic
 * @return
 */
 short int sumarPuntos(const tArray fichas1, const tArray fichas2, short int fichasCont) {
-    short int sumaPuntos;
+    short int sumaPuntos = 0;
 
-    for (int i=0; i<=fichasCont; i++) {
+    for (int i=0; i<=fichasCont - 1; i++) {
         sumaPuntos += fichas1[i];
         sumaPuntos += fichas2[i];
     }
 
     return sumaPuntos;
 }
-
