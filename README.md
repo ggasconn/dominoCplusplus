@@ -43,9 +43,11 @@ Repositorio para tener controlado por versiones y actualizado el código del eje
 - [x] Función eliminarFicha
 - [x] Función puedeColocarFicha
 - [x] Función sumarPuntos
-- [ ] Eliminar variables y/o funciones obsoletas
-- [ ] Revisar código y bugs. Duplica fichas algunas veces después de poner.
+- [x] Eliminar variables y/o funciones obsoletas
+- [x] Revisar código y bugs. Duplica fichas algunas veces después de poner.
 - [ ] Revisar función sumarPuntos
+- [ ] Ver el mejor momento para limpiar la pantalla
+- [ ] Revisión final
 
 ### Tercera versión
 
