@@ -7,7 +7,6 @@
 * Happy Coding! :)
 **/
 
-//perico
 
 #include <iostream>
 #include <cstdlib>
