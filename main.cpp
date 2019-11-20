@@ -113,8 +113,10 @@ int main() {
                 break;
                 
             case 1:
-                cout << "¿Qué ficha quieres colocar? (1-" << fichasCont << "): ";
-                cin >> fichaNum;
+                do {
+                    cout << "¿Qué ficha quieres colocar? (1-" << fichasCont << "): ";
+                    cin >> fichaNum;
+                } while(fichaNum < 0 || fichaNum > fichasCont);
 
                 if (0 < fichaNum || fichaNum <= fichasCont) {
                     fichaN1 = fichas1[fichaNum - 1];
@@ -131,8 +133,10 @@ int main() {
                 break;
             
             case 2:
-                cout << "¿Qué ficha quieres colocar? (1-" << fichasCont << "): ";
-                cin >> fichaNum;
+                do {
+                    cout << "¿Qué ficha quieres colocar? (1-" << fichasCont << "): ";
+                    cin >> fichaNum;
+                } while(fichaNum < 0 || fichaNum > fichasCont);
 
                 if (0 < fichaNum || fichaNum <= fichasCont) {
                     fichaN1 = fichas1[fichaNum - 1];
