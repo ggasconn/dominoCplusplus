@@ -488,7 +488,8 @@ bool puedeColocarFicha(const tArray fichas1, const tArray fichas2, short int fic
     short int extremoDerecha = int(tablero[tablero.size() - 2]) - int('0');
 
     while(!puedePoner && cont < fichasCont) {
-        if (fichas1[cont] == extremoIzquierda || fichas2[cont] == extremoDerecha) {
+        if (fichas1[cont] == extremoIzquierda || fichas1[cont] == extremoDerecha \
+                || fichas2[cont] == extremoIzquierda || fichas2[cont] == extremoDerecha) {
             puedePoner = true;
         }
         cont++;
