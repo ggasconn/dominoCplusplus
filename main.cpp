@@ -7,6 +7,7 @@
 * Happy Coding! :)
 **/
 
+
 #include <iostream>
 #include <cstdlib>
 #include <time.h>
@@ -110,7 +111,7 @@ int main() {
     }
 
     clear(); //Limpia la consola
-   
+
     do {
         //Muestra el tablero y el menu
         mostrarTablero(tablero, numColocadas, numRobadas, fichas1, fichas2, fichasCont);
@@ -120,11 +121,12 @@ int main() {
             case 0:
                 salir = true;
                 break;
-                
+
             case 1:
                 do {
                     cout << "¿Qué ficha quieres colocar? (1-" << fichasCont << "): ";
                     cin >> fichaNum;
+<<<<<<< HEAD
                 }while(fichaNum < 1 || fichaNum > fichasCont);
 
                 fichaN1 = fichas1[fichaNum - 1];
@@ -136,13 +138,29 @@ int main() {
                     eliminarFicha(fichas1, fichas2, fichasCont, fichaNum);
                 }else {
                     cout << fgRojo << ">>> No se puede colocar una ficha a la izquierda" << finColor << endl << endl;
+=======
+                } while(fichaNum < 0 || fichaNum > fichasCont);
+
+                if (0 < fichaNum || fichaNum <= fichasCont) {
+                    fichaN1 = fichas1[fichaNum - 1];
+                    fichaN2 = fichas2[fichaNum - 1];
+
+                    if (puedePonerIzq(tablero, fichaN1, fichaN2)) {
+                        tablero = ponerFichaIzq(tablero, fichaN1, fichaN2);
+                        numColocadas++;
+                        eliminarFicha(fichas1, fichas2, fichasCont, fichaNum);
+                    }else {
+                        cout << fgRojo << ">>> No se puede colocar una ficha a la izquierda" << finColor << endl << endl;
+                    }
+>>>>>>> 12328e5fa480caf035754b8f1feafce691ab4ba3
                 }
                 break;
-            
+
             case 2:
                 do {
                     cout << "¿Qué ficha quieres colocar? (1-" << fichasCont << "): ";
                     cin >> fichaNum;
+<<<<<<< HEAD
                 }while(fichaNum < 1 || fichaNum > fichasCont);
 
                 fichaN1 = fichas1[fichaNum - 1];
@@ -154,9 +172,24 @@ int main() {
                     eliminarFicha(fichas1, fichas2, fichasCont, fichaNum);
                 }else {
                     cout << fgRojo << ">>> No se puede colocar una ficha a la derecha" << finColor << endl << endl;
+=======
+                } while(fichaNum < 0 || fichaNum > fichasCont);
+
+                if (0 < fichaNum || fichaNum <= fichasCont) {
+                    fichaN1 = fichas1[fichaNum - 1];
+                    fichaN2 = fichas2[fichaNum - 1];
+
+                    if (puedePonerDer(tablero, fichaN1, fichaN2)) {
+                        tablero = ponerFichaDer(tablero, fichaN1, fichaN2);
+                        numColocadas++;
+                        eliminarFicha(fichas1, fichas2, fichasCont, fichaNum);
+                    }else {
+                        cout << fgRojo << ">>> No se puede colocar una ficha a la derecha" << finColor << endl << endl;
+                    }
+>>>>>>> 12328e5fa480caf035754b8f1feafce691ab4ba3
                 }
                 break;
-            
+
             case 3:
                 if (puedeColocarFicha(fichas1, fichas2, fichasCont, tablero)) {
                     cout << fgRojo << ">>> Áun puedes colocar fichas" << finColor << endl;
@@ -170,16 +203,34 @@ int main() {
                     numRobadas++;
                 }
                 break;
-            
+
             case 4:
+<<<<<<< HEAD
                 cout << fgVerde << ">>> Salvando partida a fichero game_history.txt..." << finColor << endl;
                 
+=======
+                cout << fgVerde << ">>> Salvando partida a fichero game_history.txt" << finColor << endl;
+
+>>>>>>> 12328e5fa480caf035754b8f1feafce691ab4ba3
                 if (salvarPartida(tablero, numColocadas, numRobadas, fichasCont, pozoCont, pozo1, pozo2, fichas1, fichas2)) {
                     cout << fgVerde << ">>> OK" << finColor << endl << endl;
                 }else {
                     cout << endl << fgRojo << ">>> Error: no se pudo guardar la partida o se denegó la acción" << finColor << endl << endl;
                 }
                 break;
+<<<<<<< HEAD
+=======
+
+            case 5:
+                if(!existePartida()) {
+                    cout << fgRojo << ">>> No existe ninguna partida guardada" << finColor << endl;
+                }else {
+                    recuperarPartida(tablero, numColocadas, numRobadas, fichasCont, pozoCont, \
+                                        pozo1, pozo2, fichas1, fichas2);
+                    cout << fgVerde << ">>> Partida restaurada" << finColor << endl << endl;
+                }
+                break;
+>>>>>>> 12328e5fa480caf035754b8f1feafce691ab4ba3
 
             default:
                 if (1 > opcionElegida || opcionElegida > 5) cout << fgRojo << ">>>" << opcionElegida << " no es una opción válida" << finColor << endl;
@@ -206,7 +257,7 @@ int main() {
 /**
  * Limpia la consola dependiendo del sistema operativo.
  * No es la mejor manera de hacerlo.
- * 
+ *
  */
  void clear() {
     if (system("CLS")) system("clear");
@@ -220,6 +271,7 @@ int main() {
 */
 int mostrarMenu() {
     short int opcionElegida; // Almacena lo que el usuario elije del menu
+<<<<<<< HEAD
     
     cout << fgVerde << " ------------------" << finColor << endl;
     cout << fgVerde << "| MENU DE OPCIONES |" << finColor << endl;
@@ -229,6 +281,18 @@ int mostrarMenu() {
     cout << fgVerde << "3." << finColor << " Robar ficha nueva" << endl;
     cout << fgVerde << "4." << finColor << " Salvar partida a fichero" << endl;
     cout << fgVerde << "0." << finColor << " Salir" << endl;
+=======
+
+    cout << " ------------------" << endl;
+    cout << "| MENU DE OPCIONES |" << endl;
+    cout << " ------------------" << endl;
+    cout << "1. Poner ficha por la izquierda" << endl;
+    cout << "2. Poner ficha por la derecha" << endl;
+    cout << "3. Robar ficha nueva" << endl;
+    cout << "4. Salvar partida a fichero" << endl;
+    cout << "5. Restaurar partida anterior" << endl;
+    cout << "0. Salir" << endl;
+>>>>>>> 12328e5fa480caf035754b8f1feafce691ab4ba3
     cout << "Elija una opción: ";
 
     cin >> opcionElegida;
@@ -396,7 +460,7 @@ string ponerFichaDer(string tablero, short int fichaN1, short int fichaN2){
 
 
 /**
-* Popula dos arrays con las fichas generadas. El array pozo1 se llena con 
+* Popula dos arrays con las fichas generadas. El array pozo1 se llena con
 * los numeros izquierdos de las fiches y el pozo2 los numeros de la derecha.
 *
 * @param pozo1. Array que contiene los numeros izquierdos de las fichas
@@ -482,7 +546,11 @@ bool puedeColocarFicha(const tArray fichas1, const tArray fichas2, short int fic
 
     while(!puedePoner && cont < fichasCont) {
         if (fichas1[cont] == extremoIzquierda || fichas1[cont] == extremoDerecha \
+<<<<<<< HEAD
             || fichas2[cont] == extremoIzquierda || fichas2[cont] == extremoDerecha) {
+=======
+                || fichas2[cont] == extremoIzquierda || fichas2[cont] == extremoDerecha) {
+>>>>>>> 12328e5fa480caf035754b8f1feafce691ab4ba3
             puedePoner = true;
         }
         cont++;
@@ -557,7 +625,7 @@ bool salvarPartida(string tablero , short int numColocadas, short int numRobadas
 
 /**
  * Comprueba si existe un fichero con una partida ya guardada.
- * 
+ *
  * @return true si existe el fichero, false si no
  */
 bool existePartida() {
@@ -576,7 +644,7 @@ bool existePartida() {
 */
 char confirmarBorrado() {
     char borrarPartida = 'y';
-    
+
     if (existePartida()) {
         cout << fgRojo << "@@@@@@@@@@@@" << finColor << endl;
         cout << fgRojo << "@ ATENCION @" << finColor << endl;
@@ -601,7 +669,7 @@ void recuperarPartida(string &tablero , short int &numColocadas, short int &numR
                         short int &pozoCont, tArray pozo1, tArray pozo2, tArray fichas1, tArray fichas2) {
     ifstream ficheroPartida;
     ficheroPartida.open("game_history.txt");
-    
+
     if (! ficheroPartida.is_open()) {
         throw runtime_error("No se pudo abrir el fichero con el historial. Compruebe si existe o si ha sido borrado.");
     }else {
