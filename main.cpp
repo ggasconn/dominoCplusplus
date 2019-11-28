@@ -1,7 +1,7 @@
 /*
 * Version: 2.0
 *
-* Domino realizado por Alejandro y Guillermo
+* Domino realizado por Alejandro Perea y Guillermo Gascón
 * Ambas partes extras realizadas
 *
 * Happy Coding! :)
@@ -62,42 +62,51 @@ int main() {
     //Genera semilla para saltear el numero aleatorio
     srand(time(NULL));
 
-    short int opcionElegida;
+    short int opcionElegida, fichaN1, fichaN2, pozoCont, fichaNum;
     short int numColocadas = 0;
     short int numRobadas = 0;
     short int varianteJuego = 6;
-    tArray pozo1;
-    tArray pozo2;
-    tArray fichas1;
-    tArray fichas2;
-    short int fichaN1;
-    short int fichaN2;
-    short int pozoCont;
     short int fichasCont = 0;
-    short int fichaNum;
+    tArray pozo1, pozo2, fichas1, fichas2;
     string tablero;
-    bool salir = false;
-    char restaurar;
+    bool salir = false, restaurar = false;
+
+    clear(); //Limpia la consola
 
     //Preguntar por la variante del juego
-    do {
-        cout << "Escoja el número máximo que puede tener una ficha (6-9): ";
-        cin >> varianteJuego;
-    } while (varianteJuego > 9 || varianteJuego < 6);
+    if (existePartida()) {
+        char op;
 
-    //Llena el pozo y lo desordena
-    generarPozo(pozo1, pozo2, varianteJuego, pozoCont);
-    desordenarPozo(pozo1, pozo2, pozoCont);
-    robarFicha(pozo1, pozo2, pozoCont, fichaN1, fichaN2);
-    numRobadas++;
-    tablero = fichaToStr(fichaN1, fichaN2);
+        cout << fgAzul << "Se ha encontrado una partida guardada. ¿Quiere restaurarla? (y/n): " << finColor;
+        cin >> op;
 
-    for (int i=0; i <= 6; i++) {
+        if (op == 'y') {
+            recuperarPartida(tablero, numColocadas, numRobadas, fichasCont, pozoCont, \
+                                pozo1, pozo2, fichas1, fichas2);
+            restaurar = true;
+        }
+    }
+
+    if (!restaurar) {
+        do {
+            cout << "Escoja el número máximo que puede tener una ficha (6-9): ";
+            cin >> varianteJuego;
+        } while (varianteJuego > 9 || varianteJuego < 6);
+
+        //Llena el pozo y lo desordena
+        generarPozo(pozo1, pozo2, varianteJuego, pozoCont);
+        desordenarPozo(pozo1, pozo2, pozoCont);
         robarFicha(pozo1, pozo2, pozoCont, fichaN1, fichaN2);
-        fichas1[i] = fichaN1;
-        fichas2[i] = fichaN2;
-        fichasCont++;
         numRobadas++;
+        tablero = fichaToStr(fichaN1, fichaN2);
+
+        for (int i=0; i <= 6; i++) {
+            robarFicha(pozo1, pozo2, pozoCont, fichaN1, fichaN2);
+            fichas1[i] = fichaN1;
+            fichas2[i] = fichaN2;
+            fichasCont++;
+            numRobadas++;
+        }
     }
 
     clear(); //Limpia la consola
@@ -113,38 +122,38 @@ int main() {
                 break;
                 
             case 1:
-                cout << "¿Qué ficha quieres colocar? (1-" << fichasCont << "): ";
-                cin >> fichaNum;
+                do {
+                    cout << "¿Qué ficha quieres colocar? (1-" << fichasCont << "): ";
+                    cin >> fichaNum;
+                }while(fichaNum < 1 || fichaNum > fichasCont);
 
-                if (0 < fichaNum || fichaNum <= fichasCont) {
-                    fichaN1 = fichas1[fichaNum - 1];
-                    fichaN2 = fichas2[fichaNum - 1];
+                fichaN1 = fichas1[fichaNum - 1];
+                fichaN2 = fichas2[fichaNum - 1];
 
-                    if (puedePonerIzq(tablero, fichaN1, fichaN2)) {
-                        tablero = ponerFichaIzq(tablero, fichaN1, fichaN2);
-                        numColocadas++;
-                        eliminarFicha(fichas1, fichas2, fichasCont, fichaNum);
-                    }else {
-                        cout << fgRojo << ">>> No se puede colocar una ficha a la izquierda" << finColor << endl << endl;
-                    }
+                if (puedePonerIzq(tablero, fichaN1, fichaN2)) {
+                    tablero = ponerFichaIzq(tablero, fichaN1, fichaN2);
+                    numColocadas++;
+                    eliminarFicha(fichas1, fichas2, fichasCont, fichaNum);
+                }else {
+                    cout << fgRojo << ">>> No se puede colocar una ficha a la izquierda" << finColor << endl << endl;
                 }
                 break;
             
             case 2:
-                cout << "¿Qué ficha quieres colocar? (1-" << fichasCont << "): ";
-                cin >> fichaNum;
+                do {
+                    cout << "¿Qué ficha quieres colocar? (1-" << fichasCont << "): ";
+                    cin >> fichaNum;
+                }while(fichaNum < 1 || fichaNum > fichasCont);
 
-                if (0 < fichaNum || fichaNum <= fichasCont) {
-                    fichaN1 = fichas1[fichaNum - 1];
-                    fichaN2 = fichas2[fichaNum - 1];
+                fichaN1 = fichas1[fichaNum - 1];
+                fichaN2 = fichas2[fichaNum - 1];
 
-                    if (puedePonerDer(tablero, fichaN1, fichaN2)) {
-                        tablero = ponerFichaDer(tablero, fichaN1, fichaN2);
-                        numColocadas++;
-                        eliminarFicha(fichas1, fichas2, fichasCont, fichaNum);
-                    }else {
-                        cout << fgRojo << ">>> No se puede colocar una ficha a la derecha" << finColor << endl << endl;
-                    }
+                if (puedePonerDer(tablero, fichaN1, fichaN2)) {
+                    tablero = ponerFichaDer(tablero, fichaN1, fichaN2);
+                    numColocadas++;
+                    eliminarFicha(fichas1, fichas2, fichasCont, fichaNum);
+                }else {
+                    cout << fgRojo << ">>> No se puede colocar una ficha a la derecha" << finColor << endl << endl;
                 }
                 break;
             
@@ -163,22 +172,12 @@ int main() {
                 break;
             
             case 4:
-                cout << fgVerde << ">>> Salvando partida a fichero game_history.txt" << finColor << endl;
+                cout << fgVerde << ">>> Salvando partida a fichero game_history.txt..." << finColor << endl;
                 
                 if (salvarPartida(tablero, numColocadas, numRobadas, fichasCont, pozoCont, pozo1, pozo2, fichas1, fichas2)) {
                     cout << fgVerde << ">>> OK" << finColor << endl << endl;
                 }else {
                     cout << endl << fgRojo << ">>> Error: no se pudo guardar la partida o se denegó la acción" << finColor << endl << endl;
-                }
-                break;
-            
-            case 5:
-                if(!existePartida()) {
-                    cout << fgRojo << ">>> No existe ninguna partida guardada" << finColor << endl;
-                }else {
-                    recuperarPartida(tablero, numColocadas, numRobadas, fichasCont, pozoCont, \
-                                        pozo1, pozo2, fichas1, fichas2);
-                    cout << fgVerde << ">>> Partida restaurada" << finColor << endl << endl;
                 }
                 break;
 
@@ -190,12 +189,12 @@ int main() {
         //clear();
 
         if (fichasCont == 0) {
-            cout << fgVerde << "Has ganado!!" << finColor << endl;
+            cout << fgVerde << "¡HAS GANADO!" << finColor << endl;
             salir = true;
         }
 
         if (!puedeColocarFicha(fichas1, fichas2, fichasCont, tablero) && pozoCont <= 0) {
-            cout << fgRojo << "No se pueden robar más fichas" << finColor << endl;
+            cout << endl << fgRojo << "No se pueden colocar ni robar más fichas" << finColor << endl;
             cout << fgRojo << "Los puntos totales son: " << finColor;
             cout << fgVerde << sumarPuntos(fichas1, fichas2, fichasCont) << finColor << endl;
             salir = true;
@@ -222,15 +221,14 @@ int main() {
 int mostrarMenu() {
     short int opcionElegida; // Almacena lo que el usuario elije del menu
     
-    cout << " ------------------" << endl;
-    cout << "| MENU DE OPCIONES |" << endl;
-    cout << " ------------------" << endl;
-    cout << "1. Poner ficha por la izquierda" << endl;
-    cout << "2. Poner ficha por la derecha" << endl;
-    cout << "3. Robar ficha nueva" << endl;
-    cout << "4. Salvar partida a fichero" << endl;
-    cout << "5. Restaurar partida anterior" << endl;
-    cout << "0. Salir" << endl;
+    cout << fgVerde << " ------------------" << finColor << endl;
+    cout << fgVerde << "| MENU DE OPCIONES |" << finColor << endl;
+    cout << fgVerde << " ------------------" << finColor << endl;
+    cout << fgVerde << "1." << finColor << " Poner ficha por la izquierda" << endl;
+    cout << fgVerde << "2." << finColor << " Poner ficha por la derecha" << endl;
+    cout << fgVerde << "3." << finColor << " Robar ficha nueva" << endl;
+    cout << fgVerde << "4." << finColor << " Salvar partida a fichero" << endl;
+    cout << fgVerde << "0." << finColor << " Salir" << endl;
     cout << "Elija una opción: ";
 
     cin >> opcionElegida;
@@ -277,9 +275,9 @@ string fichaToStr(short int izquierda, short int derecha){
 */
 void mostrarTablero(string tablero, short int numColocadas, short int numRobadas, \
                         const tArray fichas1, const tArray fichas2, short int fichasCont) {
-    cout << " ------------------" << endl;
-    cout << "|     TABLERO      |" << endl;
-    cout << " ------------------" << endl;
+    cout << fgVerde << " ------------------" << finColor << endl;
+    cout << fgVerde << "|     TABLERO      |" << finColor << endl;
+    cout << fgVerde << " ------------------" << finColor << endl;
     cout << tablero << endl;
     cout << "Fichas colocadas: " << numColocadas << " - Fichas robadas: " << numRobadas << endl;
     cout << "Fichas jugador: ";
@@ -352,7 +350,7 @@ bool puedePonerDer(string tablero, short int fichaN1, short int fichaN2){
 * @param fichaN1
 * @param fichaN2
 *
-* @return Devuelve el tablero actualizado o no.
+* @return Devuelve el tablero actualizado.
 */
 string ponerFichaIzq(string tablero, short int fichaN1, short int fichaN2){
     short int extremoTablero =  int(tablero[1]) - int('0');
@@ -379,7 +377,7 @@ string ponerFichaIzq(string tablero, short int fichaN1, short int fichaN2){
 * @param fichaN1
 * @param fichaN2
 *
-* @return Devuelve el tablero actualizado o no.
+* @return Devuelve el tablero actualizado.
 */
 string ponerFichaDer(string tablero, short int fichaN1, short int fichaN2){
     short int extremoTablero = int(tablero[tablero.size() - 2]) - int('0');
@@ -483,7 +481,8 @@ bool puedeColocarFicha(const tArray fichas1, const tArray fichas2, short int fic
     short int extremoDerecha = int(tablero[tablero.size() - 2]) - int('0');
 
     while(!puedePoner && cont < fichasCont) {
-        if (fichas1[cont] == extremoIzquierda || fichas2[cont] == extremoDerecha) {
+        if (fichas1[cont] == extremoIzquierda || fichas1[cont] == extremoDerecha \
+            || fichas2[cont] == extremoIzquierda || fichas2[cont] == extremoDerecha) {
             puedePoner = true;
         }
         cont++;
@@ -579,14 +578,10 @@ char confirmarBorrado() {
     char borrarPartida = 'y';
     
     if (existePartida()) {
-        //struct datosPartida valores = recuperarPartida();
-
         cout << fgRojo << "@@@@@@@@@@@@" << finColor << endl;
         cout << fgRojo << "@ ATENCION @" << finColor << endl;
         cout << fgRojo << "@@@@@@@@@@@@" << finColor << endl;
-        cout << "Se ha encontrado una partida guardada con el siguiente estado: " << endl;
-        //cout << fgAzul << "Tablero: " << valores.tablero << "   Colocadas: " << valores.numColocadas \
-        //<< "  Robadas: " << valores.numRobadas << finColor << endl;
+        cout << "Se ha encontrado una partida guardada." << endl;
         cout << "Seguro que desea sobrescribirla? (y/n): ";
         cin >> borrarPartida;
     }
