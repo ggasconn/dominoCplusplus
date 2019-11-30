@@ -13,11 +13,11 @@
 #include <string>
 #include <stdexcept>  //Contiene metodos que permiten devolver excepciones
 #include <fstream>
+#include <locale.h>
 
 using namespace std;
 
 //Colores para editar la terminal
-//Implementar estructura que contenga todos los colores
 string fgRojo = "\033[1;31m";
 string fgVerde = "\033[1;32m";
 string fgAzul = "\033[1;34m";
@@ -32,10 +32,9 @@ typedef short int tArray[numFichas];
 void clear();
 int mostrarMenu();
 string fichaToStr(short int izquierda, short int derecha);
-//void mostrarTablero(short int fichaN1, short int fichaN2, string tablero, int numColocadas, int numRobadas);
 void mostrarTablero(string tablero, short int numColocadas, short int numRobadas, \
     const tArray fichas1, const tArray fichas2, short int fichasCont);
-string toStr(int n); // Se puede usar la implementada en C++11??
+string toStr(int n);
 bool puedePonerIzq(string tablero, short int fichaN1, short int fichaN2);
 bool puedePonerDer(string tablero, short int fichaN1, short int fichaN2);
 string ponerFichaIzq(string tablero, short int fichaN1, short int fichaN2);
@@ -58,9 +57,9 @@ void recuperarPartida(string &tablero , short int &numColocadas, short int &numR
 * Funcion principal, contiene un menu interminable.
 * Se finaliza la ejecución con 0.
 */
-int main() {
-    //Genera semilla para saltear el numero aleatorio
-    srand(time(NULL));
+int main() { 
+    srand(time(NULL)); //Genera semilla para saltear el numero aleatorio
+    setlocale (LC_ALL,""); //Permite usar carácteres ISO
 
     short int opcionElegida, fichaN1, fichaN2, pozoCont, fichaNum;
     short int numColocadas = 0;
@@ -87,6 +86,7 @@ int main() {
         }
     }
 
+    //Si no se ha restaurado una partida genera una nueva
     if (!restaurar) {
         do {
             cout << "Escoja el número máximo que puede tener una ficha (6-9): ";
@@ -97,7 +97,6 @@ int main() {
         generarPozo(pozo1, pozo2, varianteJuego, pozoCont);
         desordenarPozo(pozo1, pozo2, pozoCont);
         robarFicha(pozo1, pozo2, pozoCont, fichaN1, fichaN2);
-        numRobadas++;
         tablero = fichaToStr(fichaN1, fichaN2);
 
         for (int i=0; i <= 6; i++) {
@@ -105,7 +104,6 @@ int main() {
             fichas1[i] = fichaN1;
             fichas2[i] = fichaN2;
             fichasCont++;
-            numRobadas++;
         }
     }
 
@@ -130,6 +128,8 @@ int main() {
                 fichaN1 = fichas1[fichaNum - 1];
                 fichaN2 = fichas2[fichaNum - 1];
 
+                clear();
+
                 if (puedePonerIzq(tablero, fichaN1, fichaN2)) {
                     tablero = ponerFichaIzq(tablero, fichaN1, fichaN2);
                     numColocadas++;
@@ -148,6 +148,8 @@ int main() {
                 fichaN1 = fichas1[fichaNum - 1];
                 fichaN2 = fichas2[fichaNum - 1];
 
+                clear();
+
                 if (puedePonerDer(tablero, fichaN1, fichaN2)) {
                     tablero = ponerFichaDer(tablero, fichaN1, fichaN2);
                     numColocadas++;
@@ -158,6 +160,8 @@ int main() {
                 break;
             
             case 3:
+                clear();
+
                 if (puedeColocarFicha(fichas1, fichas2, fichasCont, tablero)) {
                     cout << fgRojo << ">>> Áun puedes colocar fichas" << finColor << endl;
                 }else if (pozoCont <= 0) {
@@ -172,6 +176,7 @@ int main() {
                 break;
             
             case 4:
+                clear();
                 cout << fgVerde << ">>> Salvando partida a fichero game_history.txt..." << finColor << endl;
                 
                 if (salvarPartida(tablero, numColocadas, numRobadas, fichasCont, pozoCont, pozo1, pozo2, fichas1, fichas2)) {
@@ -182,21 +187,20 @@ int main() {
                 break;
 
             default:
-                if (1 > opcionElegida || opcionElegida > 5) cout << fgRojo << ">>>" << opcionElegida << " no es una opción válida" << finColor << endl;
+                clear();
+                if (1 > opcionElegida || opcionElegida > 5) cout << fgRojo << ">>> " << opcionElegida << " no es una opción válida" << finColor << endl;
                 break;
         }
 
-        //clear();
-
         if (fichasCont == 0) {
-            cout << fgVerde << "¡HAS GANADO!" << finColor << endl;
+            cout << endl << fgVerde << "¡HAS GANADO!" << finColor << endl << endl;
             salir = true;
         }
 
-        if (!puedeColocarFicha(fichas1, fichas2, fichasCont, tablero) && pozoCont <= 0) {
+        if (!puedeColocarFicha(fichas1, fichas2, fichasCont, tablero) && pozoCont == 0) {
             cout << endl << fgRojo << "No se pueden colocar ni robar más fichas" << finColor << endl;
             cout << fgRojo << "Los puntos totales son: " << finColor;
-            cout << fgVerde << sumarPuntos(fichas1, fichas2, fichasCont) << finColor << endl;
+            cout << fgVerde << sumarPuntos(fichas1, fichas2, fichasCont) << finColor << endl << endl;
             salir = true;
         }
     } while(!salir);
@@ -303,7 +307,8 @@ string toStr(int n){ // Se puede usar la implementada en C++???
 
 
 /**
-* Breve descripcion de la funcion
+* Comprueba si el número del tablero por la izquierda coincide con 
+* alguno de la ficha que recibe
 *
 * @param tablero
 * @param fichaN1
@@ -323,7 +328,8 @@ bool puedePonerIzq(string tablero, short int fichaN1, short int fichaN2){
 
 
 /**
-* Breve descripcion de la funcion
+* Comprueba si el número del tablero por la derecha coincide con 
+* alguno de la ficha que recibe
 *
 * @param tablero
 * @param fichaN1
@@ -342,9 +348,8 @@ bool puedePonerDer(string tablero, short int fichaN1, short int fichaN2){
 
 
 /**
-* Recibe el tablero y la ficha a colocar, si se puede realizar la acción
-* coloca la ficha en la posicion adecuada dentro del tablero, si no se puede
-* deja el tablero como estaba.
+* Recibe el tablero y la ficha a colocar, coloca la ficha a la izquierda
+* en el sentido que corresponda y devuelve el nuevo tablero.
 *
 * @param tablero
 * @param fichaN1
@@ -369,9 +374,8 @@ string ponerFichaIzq(string tablero, short int fichaN1, short int fichaN2){
 
 
 /**
-* Recibe el tablero y la ficha a colocar, si se puede realizar la acción
-* coloca la ficha en la posicion adecuada dentro del tablero, si no se puede
-* deja el tablero como estaba.
+* Recibe el tablero y la ficha a colocar, coloca la ficha a la derecha
+* en el sentido que corresponda y devuelve el nuevo tablero.
 *
 * @param tablero
 * @param fichaN1
@@ -438,11 +442,13 @@ void desordenarPozo(tArray pozo1, tArray pozo2, short int pozoCont) {
 
 
 /**
-* Breve explicación
+* Coge la siguiente ficha del pozo y modifica el contador que indexa el pozo.
 *
-* @param
-*
-* @return
+* @param pozo1. Array con los números de la derecha de las fichas del pozo.
+* @param pozo2. Array con los números de la izquierda de las fichas del pozo.
+* @param cont. Contador con las fichas restantes del pozo.
+* @param fichaN1. Número actual de la derecha de la ficha.
+* @param fichaN2. Número actual de la izquierda de la ficha.
 */
 void robarFicha(const tArray pozo1, const tArray pozo2, short int &cont, short int &fichaN1, short int &fichaN2) {
     fichaN1 = pozo1[cont - 1];
@@ -452,11 +458,12 @@ void robarFicha(const tArray pozo1, const tArray pozo2, short int &cont, short i
 
 
 /**
-* Breve explicación
+* Desplaza las fichas en los arrays que recibe y decrementa el contador de la fichas del jugador.
 *
-* @param
-*
-* @return
+* @param fichas1. Array con los números de la derecha de las fichas del jugador.
+* @param fichas2. Array con los números de la izquierda de las fichas del jugador.
+* @param fichasCont. Contador con las fichas del jugador.
+* @param fichaNum. Número de ficha elegida por el jugador, es la que se ha colocado.
 */
 void eliminarFicha (tArray fichas1, tArray fichas2, short int &fichasCont, short int fichaNum) {
     for (int i = fichaNum - 1; i <= fichasCont - 2 ; i++) {
@@ -468,11 +475,15 @@ void eliminarFicha (tArray fichas1, tArray fichas2, short int &fichasCont, short
 
 
 /**
-* Breve explicación
+* Comprueba si entre todas las fichas del jugador se puede colocar alguna en algún
+* extremo del tablero.
 *
-* @param
+* @param fichas1. Array con los números de la derecha de las fichas del jugador.
+* @param fichas2. Array con los números de la izquierda de las fichas del jugador.
+* @param fichasCont. Contador con las fichas del jugador.
+* @param tablero. String que contiene el tablero actual.
 *
-* @return
+* @return true si se puede colocar, false en caso contrario
 */
 bool puedeColocarFicha(const tArray fichas1, const tArray fichas2, short int fichasCont, string tablero) {
     bool puedePoner = false;
@@ -493,11 +504,13 @@ bool puedeColocarFicha(const tArray fichas1, const tArray fichas2, short int fic
 
 
 /**
-* Breve explicación
+* Recorre todas las fichas del jugador y suma los puntos de ellas.
 *
-* @param
+* @param fichas1. Array con los números de la derecha de las fichas del jugador.
+* @param fichas2. Array con los números de la izquierda de las fichas del jugador.
+* @param fichasCont. Contador con las fichas del jugador.
 *
-* @return
+* @return La suma de todos los números de las fichas del jugador
 */
 short int sumarPuntos(const tArray fichas1, const tArray fichas2, short int fichasCont) {
     short int sumaPuntos = 0;
@@ -517,6 +530,14 @@ short int sumarPuntos(const tArray fichas1, const tArray fichas2, short int fich
 * guardada y se pregunta si se desea sobreescribir.
 *
 * @param tablero. Contiene el estado actual de la partida.
+* @param numColocadas. Número de fichas colocadas en el tablero por el jugador.
+* @param numRobadas. Número de fichas robadas por el jugador
+* @param fichasCont. Contador con las fichas del jugador.
+* @param pozoCont. Contador con las fichas restantes del pozo.
+* @param pozo1. Array con los números de la derecha de las fichas del pozo.
+* @param pozo2. Array con los números de la izquierda de las fichas del pozo.
+* @param fichas1. Array con los números de la derecha de las fichas del jugador.
+* @param fichas2. Array con los números de la izquierda de las fichas del jugador.
 *
 * @return Devuelve true si la partida se guardo, false si no.
 */
@@ -593,9 +614,15 @@ char confirmarBorrado() {
 /**
 * Breve explicación
 *
-* @param
-*
-* @return
+* @param tablero. Contiene el estado actual de la partida.
+* @param numColocadas. Número de fichas colocadas en el tablero por el jugador.
+* @param numRobadas. Número de fichas robadas por el jugador
+* @param fichasCont. Contador con las fichas del jugador.
+* @param pozoCont. Contador con las fichas restantes del pozo.
+* @param pozo1. Array con los números de la derecha de las fichas del pozo.
+* @param pozo2. Array con los números de la izquierda de las fichas del pozo.
+* @param fichas1. Array con los números de la derecha de las fichas del jugador.
+* @param fichas2. Array con los números de la izquierda de las fichas del jugador.
 */
 void recuperarPartida(string &tablero , short int &numColocadas, short int &numRobadas, short int &fichasCont, \
                         short int &pozoCont, tArray pozo1, tArray pozo2, tArray fichas1, tArray fichas2) {
