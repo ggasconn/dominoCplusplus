@@ -55,7 +55,6 @@ void recuperarPartida(string &tablero , short int &numColocadas, short int &numR
 
 /**
 * Funcion principal, contiene un menu interminable.
-* Se finaliza la ejecución con 0.
 */
 int main() { 
     srand(time(NULL)); //Genera semilla para saltear el numero aleatorio
@@ -210,8 +209,6 @@ int main() {
 
 /**
  * Limpia la consola dependiendo del sistema operativo.
- * No es la mejor manera de hacerlo.
- * 
  */
  void clear() {
     if (system("CLS")) system("clear");
@@ -246,7 +243,7 @@ int mostrarMenu() {
 
 /**
 * Formatea una cadena en forma de ficha con los números recibidos como parámetros.
-* En caso de que los números sean mayores que 6 se devuelve una excepción y se finaliza.
+* En caso de que los números sean mayores que 9 se devuelve una excepción y se finaliza.
 *
 * @param izquierda. Contiene el número izquierdo de la ficha.
 * @param izquierda. Contiene el número derecho de la ficha.
@@ -267,16 +264,13 @@ string fichaToStr(short int izquierda, short int derecha){
 
 
 /**
-* Devuelve el tablero de la partida con los valores recibidos
+* Imprime el tablero de la partida con los valores recibidos
 *
 * @param fichaN1
 * @param fichaN2
 * @param tablero
 * @param numColocadas
 * @param numRobadas
-*
-* @return La funcion no devuelve nada, pero durante la ejecución
-* va imprimiendo el tablero con los datos recibidos
 */
 void mostrarTablero(string tablero, short int numColocadas, short int numRobadas, \
                         const tArray fichas1, const tArray fichas2, short int fichasCont) {
@@ -287,8 +281,9 @@ void mostrarTablero(string tablero, short int numColocadas, short int numRobadas
     cout << "Fichas colocadas: " << numColocadas << " - Fichas robadas: " << numRobadas << endl;
     cout << "Fichas jugador: ";
 
+    //Recorre los arrays con las fichas del jugador para ir mostrándolas
     for (int i=0; i<=fichasCont-1; i++) {
-        cout << "|" << fichas1[i] << "-" << fichas2[i] << "|";
+        cout << fichaToStr(fichas1[i], fichas2[i]);
     }
 
     cout << endl;
