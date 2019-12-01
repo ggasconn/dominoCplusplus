@@ -1,5 +1,5 @@
 /*
-* Version: 2.0
+* Version: 3.0
 *
 * Domino realizado por Alejandro Perea y Guillermo Gascón
 * Ambas partes extras realizadas
