@@ -2,10 +2,14 @@
 * Version: 3.0
 *
 * Domino realizado por Alejandro Perea y Guillermo Gascón
-* Ambas partes extras realizadas
 *
 * Happy Coding! :)
 **/
+
+/* DUDAS
+  *Se puede hacer lo que quiero con operador ternario en mostrarTablero
+  *Que devuelve exactamente la funcion robarFicha
+*/
 
 #include <iostream>
 #include <cstdlib>
@@ -23,28 +27,48 @@ string fgVerde = "\033[1;32m";
 string fgAzul = "\033[1;34m";
 string finColor = "\033[0m";
 
-
 const short int numFichas = 55;     //Numero de ficha disponibles
-typedef short int tArray[numFichas];
+const short int MinJugadores = 2, MaxJugadores = 4;
+
+typedef struct {
+    short int izquierda, derecha;
+} tFicha;
+
+typedef tFicha tFichaArray[numFichas];
+
+typedef struct {
+    tFichaArray fichas;
+    int contador;
+} tListaFichas;
+
+typedef tListaFichas tJugadores[MaxJugadores];
+typedef int tPuntosJugadores[MaxJugadores];
+
+typedef struct {
+    string tablero;
+    tListaFichas pozo;
+    tJugadores jugadores;
+    tPuntosJugadores puntos;
+    int numJugadores;
+} tJuego;
 
 
 //Prototipos de funciones a usar durante el programa
 void clear();
 int mostrarMenu();
-string fichaToStr(short int izquierda, short int derecha);
-void mostrarTablero(string tablero, short int numColocadas, short int numRobadas, \
-    const tArray fichas1, const tArray fichas2, short int fichasCont);
+string fichaToStr(tFicha ficha);
+void mostrarTablero(const tJuego &juego);
 string toStr(int n);
-bool puedePonerIzq(string tablero, short int fichaN1, short int fichaN2);
-bool puedePonerDer(string tablero, short int fichaN1, short int fichaN2);
-string ponerFichaIzq(string tablero, short int fichaN1, short int fichaN2);
-string ponerFichaDer(string tablero, short int fichaN1, short int fichaN2);
-void generarPozo(tArray pozo1, tArray pozo2, int varianteJuego, short int &pozoCont);
-void desordenarPozo(tArray pozo1, tArray pozo2, short int pozoCont);
-void robarFicha(const tArray pozo1, const tArray pozo2, short int &cont, short int &fichaN1, short int &fichaN2);
-void eliminarFicha (tArray fichas1, tArray fichas2, short int &fichasCont, short int fichaNum);
-bool puedeColocarFicha(const tArray fichas1, const tArray fichas2, short int fichasCont, string tablero);
-short int sumarPuntos(const tArray fichas1, const tArray fichas2, short int fichasCont);
+bool puedePonerIzq(string tablero, tFicha ficha);
+bool puedePonerDer(string tablero, tFicha ficha);
+void ponerFichaIzq(string &tablero, tFicha ficha);
+void ponerFichaDer(string &tablero, tFicha ficha);
+void generarPozo(tListaFichas &pozo, int varianteJuego);
+void desordenarPozo(tListaFichas &pozo);
+bool robarFicha(tListaFichas &pozo, tFicha &ficha);
+void eliminarFicha (tListaFichas &lista, tFicha &ficha);
+bool puedeColocarFicha(const tListaFichas &jugador, string tablero);
+short int sumarPuntos(const tListaFichas &jugador);
 bool salvarPartida(string tablero , short int numColocadas, short int numRobadas, short int fichasCont, short int pozoCont,\
     const tArray pozo1, const tArray pozo2, const tArray fichas1, const tArray fichas2);
 bool existePartida();
@@ -73,7 +97,7 @@ int main() {
     clear(); //Limpia la consola
 
     //Preguntar por la variante del juego
-    if (existePartida()) {
+    /*if (existePartida()) {
         char op;
 
         cout << fgAzul << "Se ha encontrado una partida guardada. ¿Quiere restaurarla? (y/n): " << finColor;
@@ -84,7 +108,7 @@ int main() {
                                 pozo1, pozo2, fichas1, fichas2);
             restaurar = true;
         }
-    }
+    }*/
 
     //Si no se ha restaurado una partida genera una nueva
     if (!restaurar) {
@@ -211,6 +235,7 @@ int main() {
  * Limpia la consola dependiendo del sistema operativo.
  */
  void clear() {
+    //CLS para windows y CLEAR para Unix based OS
     if (system("CLS")) system("clear");
  }
 
@@ -250,14 +275,14 @@ int mostrarMenu() {
 *
 * @return Ficha formateada o excepción si hay error
 */
-string fichaToStr(short int izquierda, short int derecha){
+string fichaToStr(tFicha ficha){
     // Nos aseguramos de que hemos recibido un numero que está disponible como ficha.
     // Si no es así se devuelve una excepción y acaba el juego por inconcluencia.
-    if (izquierda > 9 || derecha > 9) throw invalid_argument("Los números de las fichas no pueden ser superiores a 9");
+    if (ficha.izquierda > 9 || ficha.derecha > 9) throw invalid_argument("Los números de las fichas no pueden ser superiores a 9");
 
     string fichaFinal = "|";
 
-    fichaFinal.append(toStr(izquierda) + "-" + toStr(derecha) + "|");
+    fichaFinal.append(toStr(ficha.izquierda) + "-" + toStr(ficha.derecha) + "|");
 
     return fichaFinal;
 }
@@ -272,20 +297,26 @@ string fichaToStr(short int izquierda, short int derecha){
 * @param numColocadas
 * @param numRobadas
 */
-void mostrarTablero(string tablero, short int numColocadas, short int numRobadas, \
-                        const tArray fichas1, const tArray fichas2, short int fichasCont) {
+void mostrarTablero(const tJuego &juego) {
+    clear();
+
     cout << fgVerde << " ------------------" << finColor << endl;
     cout << fgVerde << "|     TABLERO      |" << finColor << endl;
     cout << fgVerde << " ------------------" << finColor << endl;
-    cout << tablero << endl;
-    cout << "Fichas colocadas: " << numColocadas << " - Fichas robadas: " << numRobadas << endl;
-    cout << "Fichas jugador: ";
+    cout << juego.tablero << endl;
+    
+    for(int i=juego.numJugadores; i>0; i--) {
+        //cout << (i==0 ? "Jugador     " << i : "Máquina #");
+        if (i!=0) {
+            cout << "Máquina #" << i << "    ";
+        }else {
+            cout << "Jugador    ";
+        }
 
-    //Recorre los arrays con las fichas del jugador para ir mostrándolas
-    for (int i=0; i<=fichasCont-1; i++) {
-        cout << fichaToStr(fichas1[i], fichas2[i]);
+        for (int x=0; x<=juego.jugadores[i].contador; x++) {
+            cout << fichaToStr(juego.jugadores[i].fichas[x]);
+        }
     }
-
     cout << endl;
 }
 
@@ -312,12 +343,12 @@ string toStr(int n){ // Se puede usar la implementada en C++???
 *
 * @return Devuelve true si se puede poner, false si no.
 */
-bool puedePonerIzq(string tablero, short int fichaN1, short int fichaN2){
+bool puedePonerIzq(string tablero, tFicha ficha) {
     //Usando indices, saca el segundo caracter de la cadena
     bool sePuede = false;
     short int extremoTablero =  int(tablero[1]) - int('0');
 
-    if (fichaN1 == extremoTablero || fichaN2 == extremoTablero) sePuede = true;
+    if (ficha.izquierda == extremoTablero || ficha.derecha == extremoTablero) sePuede = true;
 
     return sePuede;
 }
@@ -333,11 +364,11 @@ bool puedePonerIzq(string tablero, short int fichaN1, short int fichaN2){
 *
 * @return Devuelve true si se puede poner, false si no.
 */
-bool puedePonerDer(string tablero, short int fichaN1, short int fichaN2){
+bool puedePonerDer(string tablero, tFicha ficha) {
     bool sePuede = false;
     short int extremoTablero = int(tablero[tablero.size() - 2]) - int('0');
 
-    if (fichaN1 == extremoTablero || fichaN2 == extremoTablero) sePuede = true;
+    if (ficha.izquierda == extremoTablero || ficha.derecha == extremoTablero) sePuede = true;
 
     return sePuede;
 }
@@ -353,19 +384,21 @@ bool puedePonerDer(string tablero, short int fichaN1, short int fichaN2){
 *
 * @return Devuelve el tablero actualizado.
 */
-string ponerFichaIzq(string tablero, short int fichaN1, short int fichaN2){
+void ponerFichaIzq(string &tablero, tFicha ficha) {
     short int extremoTablero =  int(tablero[1]) - int('0');
+    short int temp;
     string fichaFinal;
 
-    if (extremoTablero == fichaN1) {
-        fichaFinal = fichaToStr(fichaN2, fichaN1);
+    if (extremoTablero == ficha.izquierda) {
+        temp = ficha.derecha;
+        ficha.derecha = ficha.izquierda;
+        ficha.izquierda = temp;
+        fichaFinal = fichaToStr(ficha);
     }else {
-        fichaFinal = fichaToStr(fichaN1, fichaN2);
+        fichaFinal = fichaToStr(ficha);
     }
 
     tablero = fichaFinal.append(tablero);
-
-    return tablero;
 }
 
 
@@ -379,19 +412,21 @@ string ponerFichaIzq(string tablero, short int fichaN1, short int fichaN2){
 *
 * @return Devuelve el tablero actualizado.
 */
-string ponerFichaDer(string tablero, short int fichaN1, short int fichaN2){
+void ponerFichaDer(string &tablero, tFicha ficha) {
     short int extremoTablero = int(tablero[tablero.size() - 2]) - int('0');
+    short int temp;
     string fichaFinal;
 
-    if (extremoTablero == fichaN1) {
-        fichaFinal = fichaToStr(fichaN1, fichaN2);
+    if (extremoTablero == ficha.derecha) {
+        fichaFinal = fichaToStr(ficha);
     }else {
-        fichaFinal = fichaToStr(fichaN2, fichaN1);
+        temp = ficha.derecha;
+        ficha.derecha = ficha.izquierda;
+        ficha.izquierda = temp;
+        fichaFinal = fichaToStr(ficha);
     }
 
     tablero = tablero.append(fichaFinal);
-
-    return tablero;
 }
 
 
@@ -402,14 +437,18 @@ string ponerFichaDer(string tablero, short int fichaN1, short int fichaN2){
 * @param pozo1. Array que contiene los numeros izquierdos de las fichas
 * @param pozo2. Array que contiene los numeros derechos de las fichas
 */
-void generarPozo(tArray pozo1, tArray pozo2, int varianteJuego, short int &pozoCont) {
-    for (int i=0; i <= varianteJuego; i++) {
-        for (int x=i; x <= varianteJuego; x++) {
-            pozo1[pozoCont] = i;
-            pozo2[pozoCont] = x;
+void generaPozo(tListaFichas &pozo, int maxDig) {
+    short int pozoCont = 0;
+
+    for (int i=0; i <= maxDig; i++) {
+        for (int x=i; x <= maxDig; x++) {
+            pozo.fichas[pozoCont].izquierda = i;
+            pozo.fichas[pozoCont].derecha = x;
             pozoCont++;
         }
     }
+
+    pozo.contador = pozoCont;
 }
 
 
@@ -420,18 +459,18 @@ void generarPozo(tArray pozo1, tArray pozo2, int varianteJuego, short int &pozoC
 * @param pozo1. Array que contiene los numeros izquierdos de las fichas
 * @param pozo2. Array que contiene los numeros derechos de las fichas
 */
-void desordenarPozo(tArray pozo1, tArray pozo2, short int pozoCont) {
-    int idx, i;
+void desordenaPozo(tListaFichas &pozo) {
+    int idx;
     short int tmp1, tmp2;
-        for (int i = pozoCont - 1; i >= 0; i--) {
+        for (int i = pozo.contador - 1; i >= 0; i--) {
             idx = rand() % (i + 1);
             if (i != idx) {
-                tmp1 = pozo1[i];
-                tmp2 = pozo2[i];
-                pozo1[i] = pozo1[idx];
-                pozo2[i] = pozo2[idx];
-                pozo1[idx] = tmp1;
-                pozo2[idx] = tmp2;
+                tmp1 = pozo.fichas[i].izquierda;
+                tmp2 = pozo.fichas[i].derecha;
+                pozo.fichas[i].izquierda = pozo.fichas[idx].izquierda;
+                pozo.fichas[i].derecha = pozo.fichas[idx].derecha;
+                pozo.fichas[idx].izquierda = tmp1;
+                pozo.fichas[idx].derecha = tmp2;
             }
         }
 }
@@ -446,10 +485,13 @@ void desordenarPozo(tArray pozo1, tArray pozo2, short int pozoCont) {
 * @param fichaN1. Número actual de la derecha de la ficha.
 * @param fichaN2. Número actual de la izquierda de la ficha.
 */
-void robarFicha(const tArray pozo1, const tArray pozo2, short int &cont, short int &fichaN1, short int &fichaN2) {
-    fichaN1 = pozo1[cont - 1];
-    fichaN2 = pozo2[cont - 1];
-    cont--;
+bool robarFicha(tListaFichas &pozo, tFicha &ficha) {
+    ficha.izquierda = pozo.fichas[pozo.contador - 1].izquierda;
+    ficha.derecha = pozo.fichas[pozo.contador - 1].derecha;
+    pozo.contador--;
+
+    //Que tiene que devolver si es diferente de 0?
+    return (pozo.contador == 0 ? false : true);
 }
 
 
@@ -461,12 +503,13 @@ void robarFicha(const tArray pozo1, const tArray pozo2, short int &cont, short i
 * @param fichasCont. Contador con las fichas del jugador.
 * @param fichaNum. Número de ficha elegida por el jugador, es la que se ha colocado.
 */
-void eliminarFicha (tArray fichas1, tArray fichas2, short int &fichasCont, short int fichaNum) {
-    for (int i = fichaNum - 1; i <= fichasCont - 2 ; i++) {
-        fichas1[i] = fichas1[i+1];
-        fichas2[i] = fichas2[i+1];
+void eliminarFicha (tListaFichas &lista, int indice) {
+    for (int i = indice - 1; i <= lista.contador - 2 ; i++) {
+        lista.fichas[i].izquierda = lista.fichas[i+1].izquierda;
+        lista.fichas[i].derecha = lista.fichas[i+1].derecha;
+
     }
-    fichasCont--;
+    lista.contador--;
 }
 
 
@@ -481,15 +524,17 @@ void eliminarFicha (tArray fichas1, tArray fichas2, short int &fichasCont, short
 *
 * @return true si se puede colocar, false en caso contrario
 */
-bool puedeColocarFicha(const tArray fichas1, const tArray fichas2, short int fichasCont, string tablero) {
+bool puedeColocarFicha(const tListaFichas &jugador, string tablero) {
     bool puedePoner = false;
     short int cont = 0;
     short int extremoIzquierda =  int(tablero[1]) - int('0');
     short int extremoDerecha = int(tablero[tablero.size() - 2]) - int('0');
 
-    while(!puedePoner && cont < fichasCont) {
-        if (fichas1[cont] == extremoIzquierda || fichas1[cont] == extremoDerecha \
-            || fichas2[cont] == extremoIzquierda || fichas2[cont] == extremoDerecha) {
+    while(!puedePoner && cont < jugador.contador) {
+        if (jugador.fichas[cont].izquierda == extremoIzquierda \
+            || jugador.fichas[cont].izquierda == extremoDerecha \
+            || jugador.fichas[cont].derecha == extremoIzquierda \
+            || jugador.fichas[cont].derecha == extremoDerecha) {
             puedePoner = true;
         }
         cont++;
@@ -508,12 +553,12 @@ bool puedeColocarFicha(const tArray fichas1, const tArray fichas2, short int fic
 *
 * @return La suma de todos los números de las fichas del jugador
 */
-short int sumarPuntos(const tArray fichas1, const tArray fichas2, short int fichasCont) {
+int sumaPuntos(const tListaFichas &jugador) {
     short int sumaPuntos = 0;
 
-    for (int i=0; i<=fichasCont - 1; i++) {
-        sumaPuntos += fichas1[i];
-        sumaPuntos += fichas2[i];
+    for (int i=0; i<=jugador.contador - 1; i++) {
+        sumaPuntos += jugador.fichas[i].izquierda;
+        sumaPuntos += jugador.fichas[i].derecha;
     }
 
     return sumaPuntos;
