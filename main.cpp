@@ -306,9 +306,9 @@ void mostrarTablero(const tJuego &juego) {
     cout << juego.tablero << endl;
     
     for(int i=juego.numJugadores; i>0; i--) {
-        //cout << (i==0 ? "Jugador     " << i : "Máquina #");
-        if (i!=0) {
-            cout << "Máquina #" << i << "    ";
+        //cout << (i==1 ? "Jugador     " : "Máquina #" << i + 1);
+        if (i==1) {
+            cout << "Máquina #" << i + 1 << "    ";
         }else {
             cout << "Jugador    ";
         }
@@ -448,6 +448,7 @@ void generaPozo(tListaFichas &pozo, int maxDig) {
         }
     }
 
+    // pozoCont va a valer 1 menos siempre. EJ: pozoCont 54 y hay 55 fichas
     pozo.contador = pozoCont;
 }
 
@@ -507,7 +508,6 @@ void eliminarFicha (tListaFichas &lista, int indice) {
     for (int i = indice - 1; i <= lista.contador - 2 ; i++) {
         lista.fichas[i].izquierda = lista.fichas[i+1].izquierda;
         lista.fichas[i].derecha = lista.fichas[i+1].derecha;
-
     }
     lista.contador--;
 }
