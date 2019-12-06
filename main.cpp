@@ -8,7 +8,7 @@
 
 /* DUDAS
   *maxDig no puede ir dentro del struct juego?
-  *Que hace exactamente la funcion quienEmpieza?
+  *Si pongo clear() en mostrar tablero omite ciertos mensajes
 */
 
 #include <iostream>
@@ -70,17 +70,18 @@ bool robarFicha(tListaFichas &pozo, tFicha &ficha);
 void eliminarFicha (tListaFichas &lista, int indice);
 bool puedeColocarFicha(const tListaFichas &jugador, string tablero);
 short int sumarPuntos(const tListaFichas &jugador);
+bool operator==(tFicha opLeft, tFicha opRight);
+bool contiene(tListaFichas fichas, tFicha ficha, int &indice);
 int quienEmpieza(const tJuego &juego, int& indice);
 void iniciar(tJuego &juego, int &jugador);
 bool sinSalida(const tJuego &juego);
 bool estrategia1(tJuego &juego, int jugador);
 bool estrategia2(tJuego &juego, int jugador);
-bool operator==(tFicha opLeft, tFicha opRight);
-bool contiene(tListaFichas fichas, tFicha ficha, int &indice);
+
 
 
 /**
-* Funcion principal, contiene un menu interminable.
+* Funcion principal.
 */
 int main() { 
     srand(time(NULL)); //Genera semilla para saltear el numero aleatorio
@@ -93,6 +94,7 @@ int main() {
     int jugador;
     tJuego juego;
     tFicha ficha;
+    bool ganado, interrumpido, jugar;
 
     do {
         cout << "¿Cuántos jugadores quieres tener? (" << MinJugadores << "-" << MaxJugadores << "): ";
@@ -102,6 +104,11 @@ int main() {
     for (int i=0; i<=MaxJugadores - 1; i++) {
         juego.puntos[i] = 0;
     }
+
+    do {
+        cout << "Elige el número máximo podrán tener las fichas (6-9): ";
+        cin >> maxDig;
+    } while(maxDig < 0 || maxDig > 9);
 
     iniciar(juego, jugador);
    
@@ -255,12 +262,12 @@ string fichaToStr(tFicha ficha){
 * @param juego Struct con todos los datos de la partida
 */
 void mostrarTablero(const tJuego &juego) {
-    //clear();
+    clear();
 
     cout << fgVerde << " ------------------" << finColor << endl;
     cout << fgVerde << "|     TABLERO      |" << finColor << endl;
     cout << fgVerde << " ------------------" << finColor << endl;
-    cout << juego.tablero << endl;
+    cout << juego.tablero << endl << endl;
     
     for(int i=juego.numJugadores - 1; i>=0; i--) {
         if (i!=0) {
@@ -273,9 +280,8 @@ void mostrarTablero(const tJuego &juego) {
             cout << fichaToStr(juego.jugadores[i].fichas[x]);
         }
 
-        cout << endl;
+        cout << endl << endl;
     }
-    cout << endl;
 }
 
 
@@ -592,4 +598,80 @@ void iniciar(tJuego &juego, int &jugador) {
     } while(!partidaIniciada);
 
     jugador = (++jugador) % juego.numJugadores;
+}
+
+bool sinSalida(const tJuego &juego) {
+    short int extremoIzquierda =  int(juego.tablero[1]) - int('0');
+    short int extremoDerecha = int(juego.tablero[juego.tablero.size() - 2]) - int('0');
+    short int jugador = 0;
+    short int ficha = 0;
+    bool puedeSeguir = false;
+
+    do {
+        do {
+            if (juego.jugadores[jugador].fichas[ficha].izquierda == extremoDerecha \
+                || juego.jugadores[jugador].fichas[ficha].izquierda == extremoIzquierda \
+                || juego.jugadores[jugador].fichas[ficha].derecha == extremoDerecha \
+                || juego.jugadores[jugador].fichas[ficha].derecha == extremoIzquierda) {
+                puedeSeguir = true;
+            }
+            ficha++;
+        } while(ficha < juego.jugadores[jugador].contador - 1 && !puedeSeguir);
+
+        jugador++;
+    } while (jugador < juego.numJugadores - 1 && !puedeSeguir);
+
+    return puedeSeguir;
+}
+
+bool estrategia1(tJuego &juego, int jugador) {
+    bool encontrado = false;
+    short int fichaNum = 0;
+
+    do {
+        if (puedePonerIzq(juego.tablero, juego.jugadores[jugador].fichas[fichaNum])) {
+            ponerFichaIzq(juego.tablero, juego.jugadores[jugador].fichas[fichaNum]);
+            eliminarFicha(juego.jugadores[jugador], fichaNum);
+            encontrado = true;
+        }else if (puedePonerDer(juego.tablero, juego.jugadores[jugador].fichas[fichaNum])) {
+            ponerFichaDer(juego.tablero, juego.jugadores[jugador].fichas[fichaNum]);
+            eliminarFicha(juego.jugadores[jugador], fichaNum);
+            encontrado = true;
+        }else {
+            fichaNum++;
+        }
+    } while(!encontrado && fichaNum < juego.jugadores[jugador].contador);
+
+    return encontrado;
+}
+
+bool estrategia2(tJuego &juego, int jugador) {
+    bool encontrado = false;
+    short int posMejor = -1, puntosMejor = -1, puntos;
+
+    for (int i=0; i<=juego.jugadores[jugador].contador - 1; i++) {
+        if (puedePonerIzq(juego.tablero, juego.jugadores[jugador].fichas[i]) \
+            || puedePonerDer(juego.tablero, juego.jugadores[jugador].fichas[i])) {
+                puntos = juego.jugadores[jugador].fichas[i].izquierda + juego.jugadores[jugador].fichas[i].derecha;
+                
+                if (jugador > puntosMejor) {
+                    posMejor = i;
+                    puntosMejor = puntos;
+                }
+        }
+    }
+
+    if (posMejor >= 0) {
+        encontrado = true;
+
+        if (puedePonerIzq(juego.tablero, juego.jugadores[jugador].fichas[posMejor])) {
+            ponerFichaIzq(juego.tablero, juego.jugadores[jugador].fichas[posMejor]);
+        }else {
+            ponerFichaDer(juego.tablero, juego.jugadores[jugador].fichas[posMejor]);
+        }
+
+        eliminarFicha(juego.jugadores[jugador], posMejor);
+    }
+
+    return encontrado;
 }
