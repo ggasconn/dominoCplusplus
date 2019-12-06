@@ -69,7 +69,7 @@ void desordenarPozo(tListaFichas &pozo);
 bool robarFicha(tListaFichas &pozo, tFicha &ficha);
 void eliminarFicha (tListaFichas &lista, int indice);
 bool puedeColocarFicha(const tListaFichas &jugador, string tablero);
-short int sumarPuntos(const tListaFichas &jugador);
+int sumarPuntos(const tListaFichas &jugador);
 bool operator==(tFicha opLeft, tFicha opRight);
 bool contiene(tListaFichas fichas, tFicha ficha, int &indice);
 int quienEmpieza(const tJuego &juego, int& indice);
@@ -77,7 +77,6 @@ void iniciar(tJuego &juego, int &jugador);
 bool sinSalida(const tJuego &juego);
 bool estrategia1(tJuego &juego, int jugador);
 bool estrategia2(tJuego &juego, int jugador);
-
 
 
 /**
@@ -88,13 +87,12 @@ int main() {
     setlocale (LC_ALL,""); //Permite usar carácteres ISO
 
     short int opcionElegida;
-    bool salir = false, restaurar = false;
-
-    //Nuevas variables
     int jugador;
     tJuego juego;
     tFicha ficha;
-    bool ganado, interrumpido, jugar;
+    bool ganado, interrumpido, jugar, haColocado, reiniciar;
+    char guardar;
+    short int fichaNum, sumaPuntos;
 
     do {
         cout << "¿Cuántos jugadores quieres tener? (" << MinJugadores << "-" << MaxJugadores << "): ";
@@ -108,93 +106,112 @@ int main() {
     do {
         cout << "Elige el número máximo podrán tener las fichas (6-9): ";
         cin >> maxDig;
-    } while(maxDig < 0 || maxDig > 9);
+    } while(maxDig < 6 || maxDig > 9);
 
     iniciar(juego, jugador);
    
     do {
-        //Muestra el tablero y el menu
-        mostrarTablero(juego);
-        opcionElegida = mostrarMenu();
+        jugar = true;
+        interrumpido, ganado, haColocado = false;
+        do {
+            mostrarTablero(juego);
+            if (jugador == 0) {
+                opcionElegida = mostrarMenu();
 
-        switch (opcionElegida) {
-            case 0:
-                salir = true;
-                break;
+                switch (opcionElegida) {
+                    case 0:
+                        interrumpido = true;
+                        break;        
+
+                    case 1:
+                        do {
+                            cout << "¿Qué ficha quieres colocar? (1-" << juego.jugadores[0].contador << "): ";
+                            cin >> fichaNum;
+                        }while(fichaNum < 1 || fichaNum > juego.jugadores[0].contador);
+
+                        //clear();
+
+                        if (puedePonerIzq(juego.tablero, juego.jugadores[0].fichas[fichaNum - 1])) {
+                            ponerFichaIzq(juego.tablero, juego.jugadores[0].fichas[fichaNum - 1]);
+                            juego.puntos[0]++;
+                            eliminarFicha(juego.jugadores[0], fichaNum);
+
+                            juego.jugadores[0].contador == 0 ? ganado = true : jugador = (++jugador) % juego.numJugadores;  
+                        }else {
+                            cout << fgRojo << ">>> No se puede colocar una ficha a la izquierda" << finColor << endl << endl;
+                        }
+                        break;
+                    
+                    case 2:
+                        do {
+                            cout << "¿Qué ficha quieres colocar? (1-" << juego.jugadores[0].contador << "): ";
+                            cin >> fichaNum;
+                        }while(fichaNum < 1 || fichaNum > juego.jugadores[0].contador);
+
+                        //clear();
+
+                        if (puedePonerDer(juego.tablero, juego.jugadores[0].fichas[fichaNum - 1])) {
+                            ponerFichaDer(juego.tablero, juego.jugadores[0].fichas[fichaNum - 1]);
+                            juego.puntos[0]++;
+                            eliminarFicha(juego.jugadores[0], fichaNum);
+
+                            juego.jugadores[0].contador == 0 ? ganado = true : jugador = (++jugador) % juego.numJugadores;  
+                        }else {
+                            cout << fgRojo << ">>> No se puede colocar una ficha a la derecha" << finColor << endl << endl;
+                        }
+                        break;
+                    
+                    case 3:
+                        //clear();
+
+                        if (!puedeColocarFicha(juego.jugadores[0], juego.tablero) && juego.pozo.contador == 0) {
+                            jugador = (++jugador) % juego.numJugadores;  
+                        }
+                        break;
+                }
+            }else {
+                    haColocado = jugador == 1 ? estrategia2(juego, jugador) : estrategia1(juego, jugador);
+                    
+                    if (haColocado) {
+                        if (juego.jugadores[jugador].contador == 0) {
+                            ganado = true;
+                        }else {
+                          jugador = (++jugador) % juego.numJugadores;  
+                        }
+                    }else {
+                        robarFicha(juego.pozo, ficha);
+                        juego.jugadores[jugador].fichas[juego.jugadores[jugador].contador].izquierda = ficha.izquierda;
+                        juego.jugadores[jugador].fichas[juego.jugadores[jugador].contador].derecha = ficha.derecha;
+                    }
+            }
+
+            if(sinSalida(juego)) {
+                mostrarTablero(juego);
+                opcionElegida = 0;
+            }
+
+            if (interrumpido) {
+                cout << "El juego se ha interrrumpido. ¿Quiere guardar la partida? (y/n): ";
+                cin >> guardar;
                 
-            case 1:
-                /*do {
-                    cout << "¿Qué ficha quieres colocar? (1-" << fichasCont << "): ";
-                    cin >> fichaNum;
-                }while(fichaNum < 1 || fichaNum > fichasCont);
+                //guardar == 'y' ? salvarPartida();
 
-                fichaN1 = fichas1[fichaNum - 1];
-                fichaN2 = fichas2[fichaNum - 1];
-
-                clear();
-
-                if (puedePonerIzq(tablero, fichaN1, fichaN2)) {
-                    tablero = ponerFichaIzq(tablero, fichaN1, fichaN2);
-                    numColocadas++;
-                    eliminarFicha(fichas1, fichas2, fichasCont, fichaNum);
+                jugar = false;
+            }else {
+                //TODO: Mostrar ganador
+                for (int i=0; i>=juego.numJugadores - 1; i++) {
+                    sumaPuntos = sumarPuntos(juego.jugadores[i]);
+                    juego.puntos[i] += sumaPuntos;
+                    cout << "Los puntos finales del jugador " << i << " son: " << sumaPuntos << endl;
+                }
+                if (reiniciar) {
+                    //TODO: jugar nuevo juego
                 }else {
-                    cout << fgRojo << ">>> No se puede colocar una ficha a la izquierda" << finColor << endl << endl;
-                }*/
-                break;
-            
-            case 2:
-                /*do {
-                    cout << "¿Qué ficha quieres colocar? (1-" << fichasCont << "): ";
-                    cin >> fichaNum;
-                }while(fichaNum < 1 || fichaNum > fichasCont);
-
-                fichaN1 = fichas1[fichaNum - 1];
-                fichaN2 = fichas2[fichaNum - 1];
-
-                clear();
-
-                if (puedePonerDer(tablero, fichaN1, fichaN2)) {
-                    tablero = ponerFichaDer(tablero, fichaN1, fichaN2);
-                    numColocadas++;
-                    eliminarFicha(fichas1, fichas2, fichasCont, fichaNum);
-                }else {
-                    cout << fgRojo << ">>> No se puede colocar una ficha a la derecha" << finColor << endl << endl;
-                }*/
-                break;
-            
-            case 3:
-                /*clear();
-
-                if (puedeColocarFicha(fichas1, fichas2, fichasCont, tablero)) {
-                    cout << fgRojo << ">>> Áun puedes colocar fichas" << finColor << endl;
-                }else if (pozoCont <= 0) {
-                    salir = true;
-                }else {
-                    robarFicha(pozo1, pozo2, pozoCont, fichaN1, fichaN2);
-                    fichas1[fichasCont] = fichaN1;
-                    fichas2[fichasCont] = fichaN2;
-                    fichasCont++;
-                    numRobadas++;
-                }*/
-                break;
-            
-            case 4:
-                clear();
-                cout << fgVerde << ">>> Salvando partida a fichero game_history.txt..." << finColor << endl;
-                
-                /*if (salvarPartida(tablero, numColocadas, numRobadas, fichasCont, pozoCont, pozo1, pozo2, fichas1, fichas2)) {
-                    cout << fgVerde << ">>> OK" << finColor << endl << endl;
-                }else {
-                    cout << endl << fgRojo << ">>> Error: no se pudo guardar la partida o se denegó la acción" << finColor << endl << endl;
-                }*/
-                break;
-
-            default:
-                clear();
-                if (1 > opcionElegida || opcionElegida > 5) cout << fgRojo << ">>> " << opcionElegida << " no es una opción válida" << finColor << endl;
-                break;
-        }
-    } while(!salir);
+                    jugar = false;
+                }
+            }
+        } while(opcionElegida != 0 && !ganado);
+    } while(!jugar);
 }
 
 
@@ -222,14 +239,13 @@ int mostrarMenu() {
         cout << fgVerde << "1." << finColor << " Poner ficha por la izquierda" << endl;
         cout << fgVerde << "2." << finColor << " Poner ficha por la derecha" << endl;
         cout << fgVerde << "3." << finColor << " Robar ficha nueva" << endl;
-        cout << fgVerde << "4." << finColor << " Salvar partida a fichero" << endl;
         cout << fgVerde << "0." << finColor << " Salir" << endl;
         cout << "Elija una opción: ";
 
         cin >> opcionElegida;
 
         cout << endl;
-    } while(opcionElegida < 0 || opcionElegida > 4);
+    } while(opcionElegida < 0 || opcionElegida > 3);
 
     return opcionElegida;
 }
@@ -246,7 +262,7 @@ int mostrarMenu() {
 string fichaToStr(tFicha ficha){
     // Nos aseguramos de que hemos recibido un numero que está disponible como ficha.
     // Si no es así se devuelve una excepción y acaba el juego por inconcluencia.
-    if (ficha.izquierda > 9 || ficha.derecha > 9) throw invalid_argument("Los números de las fichas no pueden ser superiores a 9");
+    if (ficha.izquierda > 9 || ficha.derecha > 9) throw invalid_argument("Los números de las fichas no pueden ser superiores a 9. Recibido " + ficha.izquierda + ficha.derecha);
 
     string fichaFinal = "|";
 
@@ -262,7 +278,7 @@ string fichaToStr(tFicha ficha){
 * @param juego Struct con todos los datos de la partida
 */
 void mostrarTablero(const tJuego &juego) {
-    clear();
+    //clear();
 
     cout << fgVerde << " ------------------" << finColor << endl;
     cout << fgVerde << "|     TABLERO      |" << finColor << endl;
@@ -508,8 +524,8 @@ bool puedeColocarFicha(const tListaFichas &jugador, string tablero) {
 *
 * @return La suma de todos los números de las fichas del jugador
 */
-int sumaPuntos(const tListaFichas &jugador) {
-    short int sumaPuntos = 0;
+int sumarPuntos(const tListaFichas &jugador) {
+    int sumaPuntos = 0;
 
     for (int i=0; i<=jugador.contador - 1; i++) {
         sumaPuntos += jugador.fichas[i].izquierda;
