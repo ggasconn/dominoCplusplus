@@ -262,16 +262,18 @@ void mostrarTablero(const tJuego &juego) {
     cout << fgVerde << " ------------------" << finColor << endl;
     cout << juego.tablero << endl;
     
-    for(int i=juego.numJugadores; i>0; i--) {
-        if (i!=1) {
-            cout << "Máquina #" << i - 1 << "    ";
+    for(int i=juego.numJugadores - 1; i>=0; i--) {
+        if (i!=0) {
+            cout << "Máquina #" << i << "    ";
         }else {
-            cout << "Jugador    ";
+            cout << "Jugador       ";
         }
 
         for (int x=0; x<=juego.jugadores[i].contador-1; x++) {
             cout << fichaToStr(juego.jugadores[i].fichas[x]);
         }
+
+        cout << endl;
     }
     cout << endl;
 }
@@ -538,16 +540,28 @@ bool contiene(tListaFichas fichas, tFicha ficha, int &indice) {
 
 }
 
-/*int quienEmpieza(const tJuego &juego, int& indice) {
+int quienEmpieza(const tJuego &juego, int& indice) {
     short int jugador = -1, p, dd = 6;
+    tFicha ficha;
 
     while ((jugador < 0) && (dd >= 0)) {
+        ficha.izquierda = dd;
+        ficha.derecha = dd;
         p = 0;
-        while((p < juego.numJugadores) && (contiene())) {
+
+        while((p < juego.numJugadores) && (!contiene(juego.jugadores[p], ficha, indice))) {
             p++;
         }
+
+        if (p == juego.numJugadores) {
+            dd--;
+        }else {
+            jugador = p;
+        }
     }
-}*/
+
+    return jugador;
+}
 
 void iniciar(tJuego &juego, int &jugador) {
     bool partidaIniciada = false;
@@ -557,11 +571,15 @@ void iniciar(tJuego &juego, int &jugador) {
         generarPozo(juego.pozo, maxDig);
         desordenarPozo(juego.pozo);
         for (int i=0; i<=juego.numJugadores - 1; i++) {
+            juego.jugadores[i].contador = 0;
             for (int x=0; x<=6; x++) {
                 robarFicha(juego.pozo, juego.jugadores[i].fichas[x]);
+                juego.jugadores[i].contador++;
             }
         }
+
         jugador = quienEmpieza(juego, indice);
+
         if (jugador >= 0) {
             juego.tablero = fichaToStr(juego.jugadores[jugador].fichas[indice]);
             eliminarFicha(juego.jugadores[jugador], indice);
