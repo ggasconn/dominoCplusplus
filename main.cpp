@@ -166,6 +166,8 @@ int main() {
 
                         if (!puedeColocarFicha(juego.jugadores[0], juego.tablero) && juego.pozo.contador == 0) {
                             jugador = (++jugador) % juego.numJugadores;  
+                        }else {
+                            cout << fgRojo << ">>> Aún puedes colocar fichas!" << finColor << endl;
                         }
                         break;
                 }
@@ -262,7 +264,7 @@ int mostrarMenu() {
 string fichaToStr(tFicha ficha){
     // Nos aseguramos de que hemos recibido un numero que está disponible como ficha.
     // Si no es así se devuelve una excepción y acaba el juego por inconcluencia.
-    if (ficha.izquierda > 9 || ficha.derecha > 9) throw invalid_argument("Los números de las fichas no pueden ser superiores a 9. Recibido " + ficha.izquierda + ficha.derecha);
+    //if (ficha.izquierda > 9 || ficha.derecha > 9) throw invalid_argument("Los números de las fichas no pueden ser superiores a 9. Recibido " + ficha.izquierda + ficha.derecha);
 
     string fichaFinal = "|";
 
@@ -480,7 +482,7 @@ bool robarFicha(tListaFichas &pozo, tFicha &ficha) {
 * @param fichas2. Número de la ficha a borrar
 */
 void eliminarFicha (tListaFichas &lista, int indice) {
-    for (int i = indice - 1; i <= lista.contador - 2 ; i++) {
+    for (int i = indice - 1; i <= lista.contador - 1 ; i++) {
         lista.fichas[i].izquierda = lista.fichas[i+1].izquierda;
         lista.fichas[i].derecha = lista.fichas[i+1].derecha;
     }
@@ -592,7 +594,7 @@ void iniciar(tJuego &juego, int &jugador) {
     do {
         generarPozo(juego.pozo, maxDig);
         desordenarPozo(juego.pozo);
-        for (int i=0; i<=juego.numJugadores - 1; i++) {
+        for (int i=0; i<=juego.numJugadores + 1; i++) {
             juego.jugadores[i].contador = 0;
             for (int x=0; x<=6; x++) {
                 robarFicha(juego.pozo, juego.jugadores[i].fichas[x]);
@@ -604,8 +606,8 @@ void iniciar(tJuego &juego, int &jugador) {
 
         if (jugador >= 0) {
             juego.tablero = fichaToStr(juego.jugadores[jugador].fichas[indice]);
-            eliminarFicha(juego.jugadores[jugador], indice);
-            cout << "Empieza el jugador " << jugador << endl;
+            eliminarFicha(juego.jugadores[jugador], indice + 1);
+            cout << fgVerde << ">>> Empieza el jugador " << jugador << finColor << endl;
             partidaIniciada = true;
         }else {
             cout << "Nadie tiene dobles" << endl;
@@ -621,7 +623,7 @@ bool sinSalida(const tJuego &juego) {
     short int extremoDerecha = int(juego.tablero[juego.tablero.size() - 2]) - int('0');
     short int jugador = 0;
     short int ficha = 0;
-    bool puedeSeguir = false;
+    bool sinSalida = true;
 
     do {
         do {
@@ -629,15 +631,15 @@ bool sinSalida(const tJuego &juego) {
                 || juego.jugadores[jugador].fichas[ficha].izquierda == extremoIzquierda \
                 || juego.jugadores[jugador].fichas[ficha].derecha == extremoDerecha \
                 || juego.jugadores[jugador].fichas[ficha].derecha == extremoIzquierda) {
-                puedeSeguir = true;
+                sinSalida = false;
             }
             ficha++;
-        } while(ficha < juego.jugadores[jugador].contador - 1 && !puedeSeguir);
+        } while(ficha < juego.jugadores[jugador].contador - 1 && sinSalida);
 
         jugador++;
-    } while (jugador < juego.numJugadores - 1 && !puedeSeguir);
+    } while (jugador < juego.numJugadores - 1 && sinSalida);
 
-    return puedeSeguir;
+    return sinSalida;
 }
 
 bool estrategia1(tJuego &juego, int jugador) {
