@@ -7,9 +7,10 @@
 **/
 
 /* DUDAS
-  *maxDig no puede ir dentro del struct juego?
   *Si pongo clear() en mostrar tablero omite ciertos mensajes
   *Pasar maxDig a funcion
+  *Al jugador que pone la ficha se le suma 1 punto?
+  *Rehacer o revisar sinSalida
 */
 
 #include <iostream>
@@ -30,7 +31,6 @@ string finColor = "\033[0m";
 
 const short int numFichas = 55;     //Numero de ficha disponibles
 const short int MinJugadores = 2, MaxJugadores = 4;
-short int maxDig = 6; //Numero máximo de ficha
 
 typedef struct {
     short int izquierda, derecha;
@@ -52,6 +52,7 @@ typedef struct {
     tJugadores jugadores;
     tPuntosJugadores puntos;
     int numJugadores;
+    short int maxDig;
 } tJuego;
 
 
@@ -106,8 +107,8 @@ int main() {
 
     do {
         cout << "Elige el número máximo podrán tener las fichas (6-9): ";
-        cin >> maxDig;
-    } while(maxDig < 6 || maxDig > 9);
+        cin >> juego.maxDig;
+    } while(juego.maxDig < 6 || juego.maxDig > 9);
 
     iniciar(juego, jugador);
    
@@ -116,6 +117,7 @@ int main() {
         interrumpido = false;
         ganado = false;
         haColocado = false;
+        reiniciar = false;
         do {
             mostrarTablero(juego);
             if (jugador == 0) {
@@ -166,16 +168,23 @@ int main() {
                     
                     case 3:
                         //clear();
+                        if (puedeColocarFicha(juego.jugadores[0], juego.tablero)) {
+                            cout << fgRojo << ">>> Aún puedes colocar fichas!" << finColor << endl;
+                        }else if(juego.pozo.contador == 0) {
+                            jugador = (++jugador) % juego.numJugadores;  
+                        }else {
+                            robarFicha(juego.pozo, ficha);
+                            juego.jugadores[0].fichas[juego.jugadores[0].contador + 1] = ficha;
+                            juego.jugadores[0].contador++;
+                        }
 
-                        if (!puedeColocarFicha(juego.jugadores[0], juego.tablero) && juego.pozo.contador == 0) {
+                        /*if (!puedeColocarFicha(juego.jugadores[0], juego.tablero) && juego.pozo.contador == 0) {
                             jugador = (++jugador) % juego.numJugadores;  
                         }else {
                             cout << fgRojo << ">>> Aún puedes colocar fichas!" << finColor << endl;
-                        }
+                        }*/
                         break;
                 }
-
-                if (juego.jugadores[0].contador == 0) ganado = true;
             }else {
                     haColocado = jugador == 1 ? estrategia2(juego, jugador) : estrategia1(juego, jugador);
                     
@@ -183,6 +192,7 @@ int main() {
                         if (juego.jugadores[jugador].contador == 0) {
                             ganado = true;
                         }else {
+                            juego.puntos[jugador]++;
                             jugador = (++jugador) % juego.numJugadores;  
                         }
                     }else {
@@ -191,6 +201,7 @@ int main() {
                         }else {
                             robarFicha(juego.pozo, ficha);
                             juego.jugadores[jugador].fichas[juego.jugadores[jugador].contador] = ficha;
+                            juego.jugadores[jugador].contador++;
                         }
                     }
             }
@@ -199,28 +210,28 @@ int main() {
                 mostrarTablero(juego);
                 opcionElegida = 0;
             }
-
-            if (interrumpido) {
-                cout << "El juego se ha interrrumpido. ¿Quiere guardar la partida? (y/n): ";
-                cin >> guardar;
-                
-                //guardar == 'y' ? salvarPartida();
-
-                jugar = false;
-            }else {
-                //TODO: Mostrar ganador
-                for (int i=0; i>=juego.numJugadores - 1; i++) {
-                    sumaPuntos = sumarPuntos(juego.jugadores[i]);
-                    juego.puntos[i] += sumaPuntos;
-                    cout << "Los puntos finales del jugador " << i << " son: " << sumaPuntos << endl;
-                }
-                if (reiniciar) {
-                    //TODO: jugar nuevo juego
-                }else {
-                    jugar = false;
-                }
-            }
         } while(opcionElegida != 0 && !ganado);
+        
+        if (interrumpido) {
+            cout << "El juego se ha interrrumpido. ¿Quiere guardar la partida? (y/n): ";
+            cin >> guardar;
+            
+            //guardar == 'y' ? salvarPartida();
+
+            jugar = false;
+        }else {
+            //TODO: Mostrar ganador
+            for (int i=0; i<juego.numJugadores; i++) {
+                sumaPuntos = sumarPuntos(juego.jugadores[i]);
+                sumaPuntos += juego.puntos[i];
+                cout << "Los puntos finales del jugador " << i << " son: " << sumaPuntos << endl;
+            }
+            if (reiniciar) {
+                //TODO: jugar nuevo juego
+            }else {
+                jugar = false;
+            }
+        }
     } while(jugar);
 }
 
@@ -584,7 +595,7 @@ bool contiene(tListaFichas fichas, tFicha ficha, int &indice) {
 }
 
 int quienEmpieza(const tJuego &juego, int& indice) {
-    short int jugador = -1, p, dd = 6;
+    short int jugador = -1, p, dd = juego.maxDig;
     tFicha ficha;
 
     while ((jugador < 0) && (dd >= 0)) {
@@ -611,9 +622,9 @@ void iniciar(tJuego &juego, int &jugador) {
     int indice;
 
     do {
-        generarPozo(juego.pozo, maxDig);
+        generarPozo(juego.pozo, juego.maxDig);
         desordenarPozo(juego.pozo);
-        for (int i=0; i<=juego.numJugadores + 1; i++) {
+        for (int i=0; i<=juego.numJugadores - 1; i++) {
             juego.jugadores[i].contador = 0;
             for (int x=0; x<=6; x++) {
                 robarFicha(juego.pozo, juego.jugadores[i].fichas[x]);
@@ -625,7 +636,7 @@ void iniciar(tJuego &juego, int &jugador) {
 
         if (jugador >= 0) {
             juego.tablero = fichaToStr(juego.jugadores[jugador].fichas[indice]);
-            eliminarFicha(juego.jugadores[jugador], indice + 1);
+            eliminarFicha(juego.jugadores[jugador], indice);
             cout << fgVerde << ">>> Empieza el jugador " << jugador << finColor << endl;
             partidaIniciada = true;
         }else {
@@ -640,23 +651,23 @@ void iniciar(tJuego &juego, int &jugador) {
 bool sinSalida(const tJuego &juego) {
     short int extremoIzquierda =  int(juego.tablero[1]) - int('0');
     short int extremoDerecha = int(juego.tablero[juego.tablero.size() - 2]) - int('0');
-    short int jugador = 0;
+    short int x = 0;
     short int ficha = 0;
     bool sinSalida = true;
 
     do {
         do {
-            if (juego.jugadores[jugador].fichas[ficha].izquierda == extremoDerecha \
-                || juego.jugadores[jugador].fichas[ficha].izquierda == extremoIzquierda \
-                || juego.jugadores[jugador].fichas[ficha].derecha == extremoDerecha \
-                || juego.jugadores[jugador].fichas[ficha].derecha == extremoIzquierda) {
+            if (juego.jugadores[x].fichas[ficha].izquierda == extremoDerecha \
+                || juego.jugadores[x].fichas[ficha].izquierda == extremoIzquierda \
+                || juego.jugadores[x].fichas[ficha].derecha == extremoDerecha \
+                || juego.jugadores[x].fichas[ficha].derecha == extremoIzquierda) {
                 sinSalida = false;
             }
             ficha++;
-        } while(ficha < juego.jugadores[jugador].contador && sinSalida);
+        } while(ficha < juego.jugadores[x].contador && sinSalida);
 
-        jugador++;
-    } while (jugador < juego.numJugadores && sinSalida);
+        x++;
+    } while (x < juego.numJugadores && sinSalida);
 
     return sinSalida;
 }
