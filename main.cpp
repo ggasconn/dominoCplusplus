@@ -137,7 +137,7 @@ int main() {
                         if (puedePonerIzq(juego.tablero, juego.jugadores[0].fichas[fichaNum - 1])) {
                             ponerFichaIzq(juego.tablero, juego.jugadores[0].fichas[fichaNum - 1]);
                             juego.puntos[0]++;
-                            eliminarFicha(juego.jugadores[0], fichaNum);
+                            eliminarFicha(juego.jugadores[0], fichaNum - 1);
 
                             juego.jugadores[0].contador == 0 ? ganado = true : jugador = (++jugador) % juego.numJugadores;  
                         }else {
@@ -156,7 +156,7 @@ int main() {
                         if (puedePonerDer(juego.tablero, juego.jugadores[0].fichas[fichaNum - 1])) {
                             ponerFichaDer(juego.tablero, juego.jugadores[0].fichas[fichaNum - 1]);
                             juego.puntos[0]++;
-                            eliminarFicha(juego.jugadores[0], fichaNum);
+                            eliminarFicha(juego.jugadores[0], fichaNum - 1);
 
                             juego.jugadores[0].contador == 0 ? ganado = true : jugador = (++jugador) % juego.numJugadores;  
                         }else {
