@@ -8,7 +8,6 @@
 
 /* DUDAS
   *Si pongo clear() en mostrar tablero omite ciertos mensajes
-  *Pasar maxDig a funcion
   *Al jugador que pone la ficha se le suma 1 punto?
   *Rehacer o revisar sinSalida
 */
