@@ -10,6 +10,8 @@
   *Si pongo clear() en mostrar tablero omite ciertos mensajes
   *Al jugador que pone la ficha se le suma 1 punto?
   *Rehacer o revisar sinSalida
+  *Si se roba una ficha se pasa de jugador?
+  *Mostrar tablero actualizado cuando gana alguien?
 */
 
 #include <iostream>
@@ -91,8 +93,8 @@ int main() {
     int jugador;
     tJuego juego;
     tFicha ficha;
-    bool ganado, interrumpido, jugar, haColocado, reiniciar;
-    char guardar;
+    bool ganado, interrumpido, jugar, haColocado;
+    char guardar, reiniciar;
     short int fichaNum, sumaPuntos;
 
     do {
@@ -116,7 +118,7 @@ int main() {
         interrumpido = false;
         ganado = false;
         haColocado = false;
-        reiniciar = false;
+
         do {
             mostrarTablero(juego);
             if (jugador == 0) {
@@ -173,7 +175,7 @@ int main() {
                             jugador = (++jugador) % juego.numJugadores;  
                         }else {
                             robarFicha(juego.pozo, ficha);
-                            juego.jugadores[0].fichas[juego.jugadores[0].contador + 1] = ficha;
+                            juego.jugadores[0].fichas[juego.jugadores[0].contador] = ficha;
                             juego.jugadores[0].contador++;
                         }
 
@@ -219,13 +221,18 @@ int main() {
 
             jugar = false;
         }else {
-            //TODO: Mostrar ganador
+            if (ganado) cout << fgVerde << ">>> Gana el jugador " << jugador << finColor << endl;
+
             for (int i=0; i<juego.numJugadores; i++) {
                 sumaPuntos = sumarPuntos(juego.jugadores[i]);
                 sumaPuntos += juego.puntos[i];
                 cout << "Los puntos finales del jugador " << i << " son: " << sumaPuntos << endl;
             }
-            if (reiniciar) {
+
+            cout << "¿Desea jugar otra partida? (y/n): ";
+            cin >> reiniciar;
+
+            if (reiniciar == 'y') {
                 //TODO: jugar nuevo juego
             }else {
                 jugar = false;
@@ -428,11 +435,11 @@ void ponerFichaDer(string &tablero, tFicha ficha) {
     string fichaFinal;
 
     if (extremoTablero == ficha.derecha) {
-        fichaFinal = fichaToStr(ficha);
-    }else {
         temp = ficha.derecha;
         ficha.derecha = ficha.izquierda;
         ficha.izquierda = temp;
+        fichaFinal = fichaToStr(ficha);
+    }else {
         fichaFinal = fichaToStr(ficha);
     }
 
@@ -590,7 +597,6 @@ bool contiene(tListaFichas fichas, tFicha ficha, int &indice) {
 
     indice = cont;
     return encontrado;
-
 }
 
 int quienEmpieza(const tJuego &juego, int& indice) {
@@ -650,7 +656,27 @@ void iniciar(tJuego &juego, int &jugador) {
 bool sinSalida(const tJuego &juego) {
     short int extremoIzquierda =  int(juego.tablero[1]) - int('0');
     short int extremoDerecha = int(juego.tablero[juego.tablero.size() - 2]) - int('0');
-    short int x = 0;
+    short int jugador = 0;
+    short int ficha;
+    bool sinSalida = true;
+
+    while (sinSalida && jugador < juego.numJugadores) {
+        //Se vuelve a poner la ficha a 0 para que el nuevo jugador empiece con la primera ficha
+        ficha = 0;
+        
+        do {
+            if (puedeColocarFicha(juego.jugadores[jugador], juego.tablero)) sinSalida = false;
+            ficha++;   
+        } while(juego.jugadores[jugador].contador < ficha && sinSalida);
+
+        jugador++; //Se pasa al siguiente jugador
+    }
+
+    if (sinSalida && juego.pozo.contador != 0) sinSalida = false;
+
+    return sinSalida;
+
+    /*short int x = 0;
     short int ficha = 0;
     bool sinSalida = true;
 
@@ -668,7 +694,7 @@ bool sinSalida(const tJuego &juego) {
         x++;
     } while (x < juego.numJugadores && sinSalida);
 
-    return sinSalida;
+    return sinSalida;*/
 }
 
 bool estrategia1(tJuego &juego, int jugador) {
