@@ -164,6 +164,7 @@ int main() {
                         if (puedeColocarFicha(juego.jugadores[0], juego.tablero)) {
                             cout << fgRojo << ">>> Aún puedes colocar fichas!" << finColor << endl;
                         }else if(juego.pozo.contador == 0) {
+                            cout << fgRojo << ">>> No se pueden robar más fichas" << finColor << endl;
                             jugador = (++jugador) % juego.numJugadores;  
                         }else {
                             robarFicha(juego.pozo, ficha);
@@ -171,11 +172,6 @@ int main() {
                             juego.jugadores[0].contador++;
                         }
 
-                        /*if (!puedeColocarFicha(juego.jugadores[0], juego.tablero) && juego.pozo.contador == 0) {
-                            jugador = (++jugador) % juego.numJugadores;  
-                        }else {
-                            cout << fgRojo << ">>> Aún puedes colocar fichas!" << finColor << endl;
-                        }*/
                         break;
                 }
             }else {
@@ -200,6 +196,7 @@ int main() {
             }
 
             if(sinSalida(juego)) {
+                cout << fgRojo << ">>> No se puede seguir jugando" << finColor << endl;
                 mostrarTablero(juego);
                 opcionElegida = 0;
             }
@@ -213,7 +210,10 @@ int main() {
 
             jugar = false;
         }else {
-            if (ganado) cout << endl << fgVerde << ">>> Gana el jugador " << jugador << finColor << endl;
+            if (ganado) {
+                mostrarTablero(juego); //Mostrar el tablero con el jugador sin fichas
+                cout << endl << fgVerde << ">>> Gana el jugador " << jugador << finColor << endl;
+            }
 
             for (int i=0; i<juego.numJugadores; i++) {
                 sumaPuntos = sumarPuntos(juego.jugadores[i]);
