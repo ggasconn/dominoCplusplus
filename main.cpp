@@ -9,7 +9,6 @@
 /* DUDAS
   *Si pongo clear() en mostrar tablero omite ciertos mensajes
   *Al jugador que pone la ficha se le suma 1 punto?
-  *Rehacer o revisar sinSalida
   *Si se roba una ficha se pasa de jugador?
   *Mostrar tablero actualizado cuando gana alguien?
 */
@@ -30,9 +29,10 @@ string fgVerde = "\033[1;32m";
 string fgAzul = "\033[1;34m";
 string finColor = "\033[0m";
 
-const short int numFichas = 55;     //Numero de ficha disponibles
+const short int numFichas = 55;     //Numero de fichas disponibles
 const short int MinJugadores = 2, MaxJugadores = 4;
 
+//Declaración de tipos personalizados
 typedef struct {
     short int izquierda, derecha;
 } tFicha;
@@ -77,10 +77,15 @@ bool operator==(tFicha opLeft, tFicha opRight);
 bool contiene(tListaFichas fichas, tFicha ficha, int &indice);
 int quienEmpieza(const tJuego &juego, int& indice);
 void iniciar(tJuego &juego, int &jugador);
+void configurarJuego(tJuego &juego, int &jugador);
 bool sinSalida(const tJuego &juego);
 bool estrategia1(tJuego &juego, int jugador);
 bool estrategia2(tJuego &juego, int jugador);
-
+bool leerJuego(tJuego &juego);
+bool existePartida(string nombreFichero);
+void leerListaFichas(ifstream &entrada, tListaFichas &listaFichas);
+void escribirJuego(const tJuego& juego);
+void escribirListaFichas(ofstream &salida, const tListaFichas &listaFichas);
 
 /**
 * Funcion principal.
@@ -97,21 +102,8 @@ int main() {
     char guardar, reiniciar;
     short int fichaNum, sumaPuntos;
 
-    do {
-        cout << "¿Cuántos jugadores quieres tener? (" << MinJugadores << "-" << MaxJugadores << "): ";
-        cin >> juego.numJugadores;
-    } while(juego.numJugadores < MinJugadores || juego.numJugadores > MaxJugadores);
-
-    for (int i=0; i<=MaxJugadores - 1; i++) {
-        juego.puntos[i] = 0;
-    }
-
-    do {
-        cout << "Elige el número máximo podrán tener las fichas (6-9): ";
-        cin >> juego.maxDig;
-    } while(juego.maxDig < 6 || juego.maxDig > 9);
-
-    iniciar(juego, jugador);
+    //Hace las preguntas iniciales e inicializa la partida
+    configurarJuego(juego, jugador);
    
     do {
         jugar = true;
@@ -217,11 +209,11 @@ int main() {
             cout << "El juego se ha interrrumpido. ¿Quiere guardar la partida? (y/n): ";
             cin >> guardar;
             
-            //guardar == 'y' ? salvarPartida();
+            if (guardar == 'y') escribirJuego(juego);
 
             jugar = false;
         }else {
-            if (ganado) cout << fgVerde << ">>> Gana el jugador " << jugador << finColor << endl;
+            if (ganado) cout << endl << fgVerde << ">>> Gana el jugador " << jugador << finColor << endl;
 
             for (int i=0; i<juego.numJugadores; i++) {
                 sumaPuntos = sumarPuntos(juego.jugadores[i]);
@@ -229,11 +221,11 @@ int main() {
                 cout << "Los puntos finales del jugador " << i << " son: " << sumaPuntos << endl;
             }
 
-            cout << "¿Desea jugar otra partida? (y/n): ";
+            cout << endl << "¿Desea jugar otra partida? (y/n): ";
             cin >> reiniciar;
 
             if (reiniciar == 'y') {
-                //TODO: jugar nuevo juego
+                configurarJuego(juego, jugador);
             }else {
                 jugar = false;
             }
@@ -289,7 +281,7 @@ int mostrarMenu() {
 string fichaToStr(tFicha ficha){
     // Nos aseguramos de que hemos recibido un numero que está disponible como ficha.
     // Si no es así se devuelve una excepción y acaba el juego por inconcluencia.
-    //if (ficha.izquierda > 9 || ficha.derecha > 9) throw invalid_argument("Los números de las fichas no pueden ser superiores a 9. Recibido " + ficha.izquierda + ficha.derecha);
+    if (ficha.izquierda > 9 || ficha.derecha > 9) throw invalid_argument("Los números de las fichas no pueden ser superiores a 9. Recibido " + ficha.izquierda + ficha.derecha);
 
     string fichaFinal = "|";
 
@@ -612,11 +604,7 @@ int quienEmpieza(const tJuego &juego, int& indice) {
             p++;
         }
 
-        if (p == juego.numJugadores) {
-            dd--;
-        }else {
-            jugador = p;
-        }
+        p == juego.numJugadores ? dd-- : jugador = p;
     }
 
     return jugador;
@@ -653,6 +641,38 @@ void iniciar(tJuego &juego, int &jugador) {
     jugador = (++jugador) % juego.numJugadores;
 }
 
+void configurarJuego(tJuego &juego, int &jugador) {
+    char cargarPartida;
+
+    clear(); //Limpia la consola
+
+    cout << "¿Desea cargar una partida de un fichero externo existente? (y/n): ";
+    cin >> cargarPartida;
+
+    if (cargarPartida == 'y') {
+        leerJuego(juego);
+    }else {
+        //Elegir número de jugadores máquina
+        do {
+            cout << "¿Cuántos jugadores quieres tener? (" << MinJugadores << "-" << MaxJugadores << "): ";
+            cin >> juego.numJugadores;
+        } while(juego.numJugadores < MinJugadores || juego.numJugadores > MaxJugadores);
+
+        //Inicializar puntuacion de los jugadores a 0
+        for (int i=0; i<=MaxJugadores - 1; i++) {
+            juego.puntos[i] = 0;
+        }
+
+        //Número maximo que una ficha podrá tener
+        do {
+            cout << "Elige el número máximo podrán tener las fichas (6-9): ";
+            cin >> juego.maxDig;
+        } while(juego.maxDig < 6 || juego.maxDig > 9);
+
+        iniciar(juego, jugador);
+    }
+}
+
 bool sinSalida(const tJuego &juego) {
     short int extremoIzquierda =  int(juego.tablero[1]) - int('0');
     short int extremoDerecha = int(juego.tablero[juego.tablero.size() - 2]) - int('0');
@@ -675,26 +695,6 @@ bool sinSalida(const tJuego &juego) {
     if (sinSalida && juego.pozo.contador != 0) sinSalida = false;
 
     return sinSalida;
-
-    /*short int x = 0;
-    short int ficha = 0;
-    bool sinSalida = true;
-
-    do {
-        do {
-            if (juego.jugadores[x].fichas[ficha].izquierda == extremoDerecha \
-                || juego.jugadores[x].fichas[ficha].izquierda == extremoIzquierda \
-                || juego.jugadores[x].fichas[ficha].derecha == extremoDerecha \
-                || juego.jugadores[x].fichas[ficha].derecha == extremoIzquierda) {
-                sinSalida = false;
-            }
-            ficha++;
-        } while(ficha < juego.jugadores[x].contador && sinSalida);
-
-        x++;
-    } while (x < juego.numJugadores && sinSalida);
-
-    return sinSalida;*/
 }
 
 bool estrategia1(tJuego &juego, int jugador) {
@@ -747,4 +747,98 @@ bool estrategia2(tJuego &juego, int jugador) {
     }
 
     return encontrado;
+}
+
+bool leerJuego(tJuego &juego) {
+    ifstream datosPartida;
+    string nombreFichero;
+    bool partidaCargada = false;
+
+    do {
+        cout << "Introduce el nombre del fichero para restaurar partida: ";
+        cin >> nombreFichero;
+    } while(!existePartida(nombreFichero));
+
+    datosPartida.open(nombreFichero);
+
+    if (!datosPartida.is_open()) {
+        cout << endl << fgRojo << ">>> ERROR: No se pudo abrir el fichero para cargar partida. Revise el nombre." << finColor << endl;
+    }else {
+        datosPartida >> juego.tablero; //Tablero 
+        datosPartida >> juego.maxDig; //Numero maximo de fichas
+        datosPartida >> juego.numJugadores; //Numero de jugadores
+        //Cargar fichas de los jugadores
+        for (int i=0; i<juego.numJugadores; i++) {
+            leerListaFichas(datosPartida, juego.jugadores[i]);
+        }
+        leerListaFichas(datosPartida, juego.pozo); //Fichas del pozo
+        //Puntos de cada jugador
+        for (int x=0; x<juego.numJugadores; x++) {
+            datosPartida >> juego.puntos[x];
+        }
+
+        cout << endl << fgVerde << ">>> Partida cargada desde fichero " << nombreFichero << finColor << endl;
+        partidaCargada = true;
+    }
+
+    return partidaCargada;
+}
+
+bool existePartida(string nombreFichero) {
+    ifstream ficheroPartida;
+
+    ficheroPartida.open(nombreFichero);
+
+    if (!ficheroPartida.good()) cout << fgRojo << ">>> ERROR: El fichero no existe. Compruebe el nombre." << finColor << endl;
+
+    return ficheroPartida.good();
+}
+
+void leerListaFichas(ifstream &entrada, tListaFichas &listaFichas) {
+    //Guardar primero el contador para poder sacar las fichas posteriormente
+    entrada >> listaFichas.contador;
+
+    for (int i=0; i<listaFichas.contador; i++) {
+        entrada >> listaFichas.fichas[i].izquierda;
+        entrada >> listaFichas.fichas[i].derecha;
+    }
+}
+
+void escribirJuego(const tJuego& juego) {
+    ofstream datosPartida;
+    string nombreFichero;
+
+    cout << "Introduce el nombre del fichero para guardar la partida: ";
+    cin >> nombreFichero;
+
+    datosPartida.open(nombreFichero);
+
+    if (!datosPartida.is_open()) {
+        cout << endl << fgRojo << ">>> ERROR: No se pudo abrir/crear el fichero para salvar partida." << finColor << endl;
+    }else {
+        datosPartida << juego.tablero << endl; //Tablero 
+        datosPartida << juego.maxDig << endl; //Numero maximo de fichas
+        datosPartida << juego.numJugadores << endl; //Numero de jugadores
+        //Cargar fichas de los jugadores
+        for (int i=0; i<juego.numJugadores; i++) {
+            escribirListaFichas(datosPartida, juego.jugadores[i]);
+        }
+        escribirListaFichas(datosPartida, juego.pozo); //Fichas del pozo
+        //Puntos de cada jugador
+        for (int x=0; x<juego.numJugadores; x++) {
+            datosPartida << juego.puntos[x] << endl;
+        }
+
+        cout << endl << fgVerde << ">>> Partida salvada correctamente en fichero " << nombreFichero << finColor << endl;
+    }
+}
+
+void escribirListaFichas(ofstream &salida, const tListaFichas &listaFichas) {
+    //Guardar primero el contador para poder sacar las fichas posteriormente
+    salida << listaFichas.contador << endl;
+
+    for (int i=0; i<listaFichas.contador; i++) {
+        salida << listaFichas.fichas[i].izquierda << endl;
+        salida << listaFichas.fichas[i].derecha << endl;
+    }
 }
