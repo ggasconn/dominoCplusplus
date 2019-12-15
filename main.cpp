@@ -81,10 +81,10 @@ void configurarJuego(tJuego &juego, int &jugador);
 bool sinSalida(const tJuego &juego);
 bool estrategia1(tJuego &juego, int jugador);
 bool estrategia2(tJuego &juego, int jugador);
-bool leerJuego(tJuego &juego);
+bool leerJuego(tJuego &juego, int &jugador);
 bool existePartida(string nombreFichero);
 void leerListaFichas(ifstream &entrada, tListaFichas &listaFichas);
-void escribirJuego(const tJuego& juego);
+void escribirJuego(const tJuego& juego, int &jugador);
 void escribirListaFichas(ofstream &salida, const tListaFichas &listaFichas);
 
 /**
@@ -206,7 +206,7 @@ int main() {
             cout << "El juego se ha interrrumpido. ¿Quiere guardar la partida? (y/n): ";
             cin >> guardar;
             
-            if (guardar == 'y') escribirJuego(juego);
+            if (guardar == 'y') escribirJuego(juego, jugador);
 
             jugar = false;
         }else {
@@ -650,7 +650,7 @@ void configurarJuego(tJuego &juego, int &jugador) {
     cin >> cargarPartida;
 
     if (cargarPartida == 'y') {
-        leerJuego(juego);
+        leerJuego(juego, jugador);
     }else {
         //Elegir número de jugadores máquina
         do {
@@ -749,7 +749,7 @@ bool estrategia2(tJuego &juego, int jugador) {
     return encontrado;
 }
 
-bool leerJuego(tJuego &juego) {
+bool leerJuego(tJuego &juego, int &jugador) {
     ifstream datosPartida;
     string nombreFichero;
     bool partidaCargada = false;
@@ -764,6 +764,7 @@ bool leerJuego(tJuego &juego) {
     if (!datosPartida.is_open()) {
         cout << endl << fgRojo << ">>> ERROR: No se pudo abrir el fichero para cargar partida. Revise el nombre." << finColor << endl;
     }else {
+        datosPartida >> jugador; //Turno del jugador
         datosPartida >> juego.tablero; //Tablero 
         datosPartida >> juego.maxDig; //Numero maximo de fichas
         datosPartida >> juego.numJugadores; //Numero de jugadores
@@ -779,6 +780,7 @@ bool leerJuego(tJuego &juego) {
 
         cout << endl << fgVerde << ">>> Partida cargada desde fichero " << nombreFichero << finColor << endl;
         partidaCargada = true;
+        datosPartida.close();
     }
 
     return partidaCargada;
@@ -789,7 +791,11 @@ bool existePartida(string nombreFichero) {
 
     ficheroPartida.open(nombreFichero);
 
-    if (!ficheroPartida.good()) cout << fgRojo << ">>> ERROR: El fichero no existe. Compruebe el nombre." << finColor << endl;
+    if (!ficheroPartida.good()) {
+        cout << fgRojo << ">>> ERROR: El fichero no existe. Compruebe el nombre." << finColor << endl;
+    }else {
+        ficheroPartida.close();
+    }
 
     return ficheroPartida.good();
 }
@@ -804,7 +810,7 @@ void leerListaFichas(ifstream &entrada, tListaFichas &listaFichas) {
     }
 }
 
-void escribirJuego(const tJuego& juego) {
+void escribirJuego(const tJuego &juego, int &jugador) {
     ofstream datosPartida;
     string nombreFichero;
 
@@ -816,6 +822,7 @@ void escribirJuego(const tJuego& juego) {
     if (!datosPartida.is_open()) {
         cout << endl << fgRojo << ">>> ERROR: No se pudo abrir/crear el fichero para salvar partida." << finColor << endl;
     }else {
+        datosPartida << jugador; //Turno del jugador
         datosPartida << juego.tablero << endl; //Tablero 
         datosPartida << juego.maxDig << endl; //Numero maximo de fichas
         datosPartida << juego.numJugadores << endl; //Numero de jugadores
@@ -829,6 +836,8 @@ void escribirJuego(const tJuego& juego) {
             datosPartida << juego.puntos[x] << endl;
         }
 
+        datosPartida.close();
+
         cout << endl << fgVerde << ">>> Partida salvada correctamente en fichero " << nombreFichero << finColor << endl;
     }
 }
@@ -838,7 +847,7 @@ void escribirListaFichas(ofstream &salida, const tListaFichas &listaFichas) {
     salida << listaFichas.contador << endl;
 
     for (int i=0; i<listaFichas.contador; i++) {
-        salida << listaFichas.fichas[i].izquierda << endl;
-        salida << listaFichas.fichas[i].derecha << endl;
+        salida << listaFichas.fichas[i].izquierda << " ";
+        salida << listaFichas.fichas[i].derecha << " ";
     }
 }
