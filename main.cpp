@@ -6,13 +6,6 @@
 * Happy Coding! :)
 **/
 
-/* DUDAS
-  *Si pongo clear() en mostrar tablero omite ciertos mensajes
-  *Al jugador que pone la ficha se le suma 1 punto?
-  *Si se roba una ficha se pasa de jugador?
-  *Mostrar tablero actualizado cuando gana alguien?
-*/
-
 #include <iostream>
 #include <cstdlib>
 #include <time.h>
@@ -87,6 +80,7 @@ void leerListaFichas(ifstream &entrada, tListaFichas &listaFichas);
 void escribirJuego(const tJuego& juego, int &jugador);
 void escribirListaFichas(ofstream &salida, const tListaFichas &listaFichas);
 
+
 /**
 * Funcion principal.
 */
@@ -127,7 +121,7 @@ int main() {
                             cin >> fichaNum;
                         }while(fichaNum < 1 || fichaNum > juego.jugadores[0].contador);
 
-                        //clear();
+                        clear();
 
                         if (puedePonerIzq(juego.tablero, juego.jugadores[0].fichas[fichaNum - 1])) {
                             ponerFichaIzq(juego.tablero, juego.jugadores[0].fichas[fichaNum - 1]);
@@ -146,7 +140,7 @@ int main() {
                             cin >> fichaNum;
                         }while(fichaNum < 1 || fichaNum > juego.jugadores[0].contador);
 
-                        //clear();
+                        clear();
 
                         if (puedePonerDer(juego.tablero, juego.jugadores[0].fichas[fichaNum - 1])) {
                             ponerFichaDer(juego.tablero, juego.jugadores[0].fichas[fichaNum - 1]);
@@ -160,7 +154,7 @@ int main() {
                         break;
                     
                     case 3:
-                        //clear();
+                        clear();
                         if (puedeColocarFicha(juego.jugadores[0], juego.tablero)) {
                             cout << fgRojo << ">>> Aún puedes colocar fichas!" << finColor << endl;
                         }else if(juego.pozo.contador == 0) {
@@ -193,6 +187,8 @@ int main() {
                             juego.jugadores[jugador].contador++;
                         }
                     }
+
+                    clear();
             }
 
             if(sinSalida(juego)) {
@@ -203,7 +199,7 @@ int main() {
         } while(opcionElegida != 0 && !ganado);
         
         if (interrumpido) {
-            cout << "El juego se ha interrrumpido. ¿Quiere guardar la partida? (y/n): ";
+            cout << fgRojo << ">>> El juego se ha interrrumpido. ¿Quiere guardar la partida? (y/n): " << finColor;
             cin >> guardar;
             
             if (guardar == 'y') escribirJuego(juego, jugador);
@@ -300,8 +296,6 @@ string fichaToStr(tFicha ficha){
 * @param juego Struct con todos los datos de la partida
 */
 void mostrarTablero(const tJuego &juego) {
-    //clear();
-
     cout << fgVerde << " ------------------" << finColor << endl;
     cout << fgVerde << "|     TABLERO      |" << finColor << endl;
     cout << fgVerde << " ------------------" << finColor << endl;
@@ -319,21 +313,6 @@ void mostrarTablero(const tJuego &juego) {
         cout << fichaToStr(juego.jugadores[0].fichas[i]);
     }
     cout << endl << endl;
-
-    /*
-    for(int i=juego.numJugadores - 1; i>=0; i--) {
-        if (i!=0) {
-            cout << "Máquina #" << i << "    ";
-        }else {
-            cout << "Jugador       ";
-        }
-
-        for (int x=0; x<=juego.jugadores[i].contador-1; x++) {
-            cout << fichaToStr(juego.jugadores[i].fichas[x]);
-        }
-
-        cout << endl << endl;
-    } */
 }
 
 
@@ -495,9 +474,7 @@ void desordenarPozo(tListaFichas &pozo) {
 bool robarFicha(tListaFichas &pozo, tFicha &ficha) {
     bool roba = false;
 
-    if (pozo.contador == 0) {
-        roba = false;
-    }else {
+    if (pozo.contador != 0) {
         ficha = pozo.fichas[pozo.contador - 1];
         pozo.contador--;
         roba = true;
@@ -568,6 +545,15 @@ int sumarPuntos(const tListaFichas &jugador) {
     return sumaPuntos;
 }
 
+
+/**
+* Funcion operador que compara dos structs de fichas
+*
+* @param opLeft. Ficha de la izquierda
+* @param opRigth. Ficha de la derecha
+*
+* @return La suma de todos los números de las fichas del jugador
+*/
 bool operator==(tFicha opLeft, tFicha opRight) {
     bool igual = false;
 
@@ -578,6 +564,16 @@ bool operator==(tFicha opLeft, tFicha opRight) {
     return igual;
 }
 
+
+/**
+* Busca la ficha recibida en las fichas del jugador
+*
+* @param fichas. Struct con las fichas del jugador y un contador
+* @param ficha. Ficha que se busca
+* @param indice. Posicion donde se encuentra la ficha
+*
+* @return True si encuentra la ficha, false en caso contrario
+*/
 bool contiene(tListaFichas fichas, tFicha ficha, int &indice) {
     bool encontrado = false;
     short int cont = 0;
@@ -594,6 +590,15 @@ bool contiene(tListaFichas fichas, tFicha ficha, int &indice) {
     return encontrado;
 }
 
+
+/**
+* Busca quien tiene el doble más alto
+*
+* @param juego. Struct con todos los datos del juego
+* @param indice. Posicion donde se encuentra el doble
+*
+* @return El jugador que tiene el doble mas alto, -1 si nadie
+*/
 int quienEmpieza(const tJuego &juego, int& indice) {
     short int jugador = -1, p, dd = juego.maxDig;
     tFicha ficha;
@@ -613,6 +618,13 @@ int quienEmpieza(const tJuego &juego, int& indice) {
     return jugador;
 }
 
+
+/**
+* Inicia una partida de cero, genera y desordena fichas. Roba y pone la primera ficha
+*
+* @param juego. Struct con todos los datos del juego
+* @param jugador. Jugador que tenía en el turno en el momento de guardar
+*/
 void iniciar(tJuego &juego, int &jugador) {
     bool partidaIniciada = false;
     int indice;
@@ -634,6 +646,7 @@ void iniciar(tJuego &juego, int &jugador) {
             juego.tablero = fichaToStr(juego.jugadores[jugador].fichas[indice]);
             eliminarFicha(juego.jugadores[jugador], indice);
             cout << fgVerde << ">>> Empieza el jugador " << jugador << finColor << endl;
+            juego.puntos[jugador]++;
             partidaIniciada = true;
         }else {
             cout << "Nadie tiene dobles" << endl;
@@ -644,6 +657,15 @@ void iniciar(tJuego &juego, int &jugador) {
     jugador = (++jugador) % juego.numJugadores;
 }
 
+
+/**
+* Configura e inicia la partida. Se puede restaurar de un fichero o configurar de cero
+*
+* @param juego. Struct con todos los datos del juego
+* @param jugador. Jugador que tenía en el turno en el momento de guardar
+*
+* @return La suma de todos los números de las fichas del jugador
+*/
 void configurarJuego(tJuego &juego, int &jugador) {
     char cargarPartida;
 
@@ -676,9 +698,15 @@ void configurarJuego(tJuego &juego, int &jugador) {
     }
 }
 
+
+/**
+* Recorre todas las fichas de los jugadores buscando si alguien puede poner
+*
+* @param juego. Struct con todos los datos del juego
+*
+* @return True si alguien puede poner, false en caso contrario
+*/
 bool sinSalida(const tJuego &juego) {
-    short int extremoIzquierda =  int(juego.tablero[1]) - int('0');
-    short int extremoDerecha = int(juego.tablero[juego.tablero.size() - 2]) - int('0');
     short int jugador = 0;
     short int ficha;
     bool sinSalida = true;
@@ -700,6 +728,15 @@ bool sinSalida(const tJuego &juego) {
     return sinSalida;
 }
 
+
+/**
+* Busca la primera ficha del jugador que se pueda poner, primero a izquierda y luego a derechas.
+*
+* @param juego. Struct con todos los datos del juego
+* @param jugador. Jugador que tenía en el turno en el momento de guardar
+*
+* @return True si pone ficha, false en caso contrario
+*/
 bool estrategia1(tJuego &juego, int jugador) {
     bool encontrado = false;
     short int fichaNum = 0;
@@ -721,6 +758,15 @@ bool estrategia1(tJuego &juego, int jugador) {
     return encontrado;
 }
 
+
+/**
+* Busca la ficha del jugador que sume más puntos y la pone en el tablero
+*
+* @param juego. Struct con todos los datos del juego
+* @param jugador. Jugador que tenía en el turno en el momento de guardar
+*
+* @return True si pone ficha, false en caso contrario
+*/
 bool estrategia2(tJuego &juego, int jugador) {
     bool encontrado = false;
     short int posMejor = -1, puntosMejor = -1, puntos;
@@ -752,6 +798,13 @@ bool estrategia2(tJuego &juego, int jugador) {
     return encontrado;
 }
 
+
+/**
+* Lee todos los datos del juego a un struct.
+*
+* @param juego. Struct con todos los datos del juego
+* @param jugador. Jugador que tenía en el turno en el momento de guardar
+*/
 bool leerJuego(tJuego &juego, int &jugador) {
     ifstream datosPartida;
     string nombreFichero;
@@ -789,6 +842,14 @@ bool leerJuego(tJuego &juego, int &jugador) {
     return partidaCargada;
 }
 
+
+/**
+* Comprueba si existe el fichero que se le pasa.
+*
+* @param nombreFichero
+*
+* @return True si el fichero existe, false en caso contrario
+*/
 bool existePartida(string nombreFichero) {
     ifstream ficheroPartida;
 
@@ -803,6 +864,13 @@ bool existePartida(string nombreFichero) {
     return ficheroPartida.good();
 }
 
+
+/**
+* Lee todas las fichas guardadas en un fichero junto con su contador al struct
+*
+* @param entrada. Fichero abierto del que leer.
+* @param listaFichas. Struct con las fichas del jugador y un contador
+*/
 void leerListaFichas(ifstream &entrada, tListaFichas &listaFichas) {
     //Guardar primero el contador para poder sacar las fichas posteriormente
     entrada >> listaFichas.contador;
@@ -813,6 +881,13 @@ void leerListaFichas(ifstream &entrada, tListaFichas &listaFichas) {
     }
 }
 
+
+/**
+* Escribe todos los datos del juego a un fichero.
+*
+* @param juego. Struct con todos los datos del juego
+* @param jugador. Jugador que tenía en el turno en el momento de guardar
+*/
 void escribirJuego(const tJuego &juego, int &jugador) {
     ofstream datosPartida;
     string nombreFichero;
@@ -845,6 +920,13 @@ void escribirJuego(const tJuego &juego, int &jugador) {
     }
 }
 
+
+/**
+* Escribe todas las fichas guardadas en un fichero junto con su contador al fichero
+*
+* @param salida. Fichero abierto donde escribir.
+* @param listaFichas. Struct con las fichas del jugador y un contador
+*/
 void escribirListaFichas(ofstream &salida, const tListaFichas &listaFichas) {
     //Guardar primero el contador para poder sacar las fichas posteriormente
     salida << listaFichas.contador << endl;
