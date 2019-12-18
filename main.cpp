@@ -178,10 +178,10 @@ int main() {
                     haColocado = jugador == 1 ? estrategia2(juego, jugador) : estrategia1(juego, jugador);
                     
                     if (haColocado) {
+                        juego.puntos[jugador]++;
                         if (juego.jugadores[jugador].contador == 0) {
                             ganado = true;
                         }else {
-                            juego.puntos[jugador]++;
                             jugador = (++jugador) % juego.numJugadores;  
                         }
                     }else {
@@ -281,7 +281,10 @@ int mostrarMenu() {
 string fichaToStr(tFicha ficha){
     // Nos aseguramos de que hemos recibido un numero que está disponible como ficha.
     // Si no es así se devuelve una excepción y acaba el juego por inconcluencia.
-    if (ficha.izquierda > 9 || ficha.derecha > 9) throw invalid_argument("Los números de las fichas no pueden ser superiores a 9. Recibido " + ficha.izquierda + ficha.derecha);
+    if (ficha.izquierda > 9 || ficha.derecha > 9) {
+        throw invalid_argument("Los números de las fichas no pueden ser superiores a 9. Recibido: " \
+                + toStr(ficha.izquierda) + "  " + toStr(ficha.derecha));
+    }
 
     string fichaFinal = "|";
 
