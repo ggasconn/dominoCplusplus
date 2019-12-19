@@ -712,13 +712,7 @@ bool sinSalida(const tJuego &juego) {
     bool sinSalida = true;
 
     while (sinSalida && jugador < juego.numJugadores) {
-        //Se vuelve a poner la ficha a 0 para que el nuevo jugador empiece con la primera ficha
-        ficha = 0;
-        
-        do {
-            if (puedeColocarFicha(juego.jugadores[jugador], juego.tablero)) sinSalida = false;
-            ficha++;   
-        } while(juego.jugadores[jugador].contador < ficha && sinSalida);
+        if (puedeColocarFicha(juego.jugadores[jugador], juego.tablero)) sinSalida = false;
 
         jugador++; //Se pasa al siguiente jugador
     }
@@ -900,7 +894,7 @@ void escribirJuego(const tJuego &juego, int &jugador) {
     if (!datosPartida.is_open()) {
         cout << endl << fgRojo << ">>> ERROR: No se pudo abrir/crear el fichero para salvar partida." << finColor << endl;
     }else {
-        datosPartida << jugador; //Turno del jugador
+        datosPartida << jugador << endl; //Turno del jugador
         datosPartida << juego.tablero << endl; //Tablero 
         datosPartida << juego.maxDig << endl; //Numero maximo de fichas
         datosPartida << juego.numJugadores << endl; //Numero de jugadores
