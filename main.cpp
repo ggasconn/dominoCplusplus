@@ -1,7 +1,7 @@
 /*
 * Version: 3.0
 *
-* Domino realizado por Alejandro Perea y Guillermo Gascón
+* Domino realizado por Alejandro Perea y Guillermo Gascon
 *
 * Happy Coding! :)
 **/
@@ -247,20 +247,20 @@ int main() {
 int mostrarMenu() {
     short int opcionElegida; // Almacena lo que el usuario elije del menu
     
+    cout << fgVerde << " ------------------" << finColor << endl;
+    cout << fgVerde << "| MENU DE OPCIONES |" << finColor << endl;
+    cout << fgVerde << " ------------------" << finColor << endl;
+    cout << fgVerde << "1." << finColor << " Poner ficha por la izquierda" << endl;
+    cout << fgVerde << "2." << finColor << " Poner ficha por la derecha" << endl;
+    cout << fgVerde << "3." << finColor << " Robar ficha nueva" << endl;
+    cout << fgVerde << "0." << finColor << " Salir" << endl;
+
     do {
-        cout << fgVerde << " ------------------" << finColor << endl;
-        cout << fgVerde << "| MENU DE OPCIONES |" << finColor << endl;
-        cout << fgVerde << " ------------------" << finColor << endl;
-        cout << fgVerde << "1." << finColor << " Poner ficha por la izquierda" << endl;
-        cout << fgVerde << "2." << finColor << " Poner ficha por la derecha" << endl;
-        cout << fgVerde << "3." << finColor << " Robar ficha nueva" << endl;
-        cout << fgVerde << "0." << finColor << " Salir" << endl;
         cout << "Elija una opción: ";
-
         cin >> opcionElegida;
-
-        cout << endl;
     } while(opcionElegida < 0 || opcionElegida > 3);
+
+    cout << endl;
 
     return opcionElegida;
 }
@@ -514,10 +514,8 @@ bool puedeColocarFicha(const tListaFichas &jugador, string tablero) {
     short int extremoDerecha = int(tablero[tablero.size() - 2]) - int('0');
 
     while(!puedePoner && cont < jugador.contador) {
-        if (jugador.fichas[cont].izquierda == extremoIzquierda \
-            || jugador.fichas[cont].izquierda == extremoDerecha \
-            || jugador.fichas[cont].derecha == extremoIzquierda \
-            || jugador.fichas[cont].derecha == extremoDerecha) {
+        if (puedePonerDer(tablero, jugador.fichas[cont]) \
+            || puedePonerIzq(tablero, jugador.fichas[cont])) {
             puedePoner = true;
         }
         cont++;
@@ -900,7 +898,7 @@ void escribirJuego(const tJuego &juego, int &jugador) {
     if (!datosPartida.is_open()) {
         cout << endl << fgRojo << ">>> ERROR: No se pudo abrir/crear el fichero para salvar partida." << finColor << endl;
     }else {
-        datosPartida << jugador; //Turno del jugador
+        datosPartida << jugador << endl; //Turno del jugador
         datosPartida << juego.tablero << endl; //Tablero 
         datosPartida << juego.maxDig << endl; //Numero maximo de fichas
         datosPartida << juego.numJugadores << endl; //Numero de jugadores
@@ -935,4 +933,5 @@ void escribirListaFichas(ofstream &salida, const tListaFichas &listaFichas) {
         salida << listaFichas.fichas[i].izquierda << " ";
         salida << listaFichas.fichas[i].derecha << " ";
     }
+    salida << endl;
 }
