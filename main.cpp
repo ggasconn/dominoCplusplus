@@ -88,7 +88,7 @@ int main() {
     srand(time(NULL)); //Genera semilla para saltear el numero aleatorio
     setlocale (LC_ALL,""); //Permite usar carácteres ISO
 
-    short int opcionElegida;
+    short int opcionElegida = -1;
     int jugador;
     tJuego juego;
     tFicha ficha;
