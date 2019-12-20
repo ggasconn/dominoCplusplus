@@ -929,3 +929,4 @@ void escribirListaFichas(ofstream &salida, const tListaFichas &listaFichas) {
     }
     salida << endl;
 }
+
